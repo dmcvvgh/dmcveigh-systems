@@ -1,0 +1,7 @@
+# Gonzaga Bulldogs theme: navy, red, white
+[theme]
+base = "light"
+primaryColor = "#C8102E"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#EEF2F7"
+textColor = "#041E42"
