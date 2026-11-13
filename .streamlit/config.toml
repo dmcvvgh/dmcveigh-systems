@@ -1,0 +1,9 @@
+# Read by Streamlit Community Cloud, which runs apps from the repo root.
+# Same theme as labs/lab-01/bulldog-bash/.streamlit/config.toml (used when running locally).
+# Gonzaga Bulldogs theme: navy, red, white
+[theme]
+base = "light"
+primaryColor = "#C8102E"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#EEF2F7"
+textColor = "#041E42"
