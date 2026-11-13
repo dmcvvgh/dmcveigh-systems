@@ -1,8 +1,8 @@
-"""Tournament facts and rules for the Bulldog Bash (Gonzaga Men's Club Volleyball).
+"""Tournament facts and rules for the Bulldog Bash (Gonzaga Club Volleyball, men's and women's).
 
-This file has the *facts* (teams, pools, Saturday schedule) and the *rules*
-(standings, seeding, single-elimination brackets). It has no Streamlit code,
-so it can be tested on its own.
+This file has the *facts* (teams, pools, Saturday schedule for each division) and the
+*rules* (standings, seeding, single-elimination brackets). It has no Streamlit code,
+so it can be tested on its own. Rules take a `Division` so the same code runs both sides.
 """
 
 from __future__ import annotations
@@ -10,10 +10,9 @@ from __future__ import annotations
 import json
 import re
 from collections import Counter
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-
-DB_FILE = Path(__file__).parent / "data.json"
 
 DAYS = {"Sat": "Saturday, Nov 14", "Sun": "Sunday, Nov 15"}
 DAY_DATES = {"Sat": "20261114", "Sun": "20261115"}
@@ -23,7 +22,6 @@ BRACKET_MINUTES = 75            # Sunday best-of-3
 
 BYE = "BYE"  # an empty bracket slot: the other team advances automatically
 BRACKETS = ["Gold", "Silver", "Bronze"]
-DEFAULT_BRACKET_SIZE = 8
 STAT_FIELDS = ["Kills", "Aces", "Blocks", "Digs", "Assists", "Errors"]
 
 # ---------- Facts: organizations, teams, pools, schedule ----------
@@ -41,10 +39,50 @@ ORGS = {
     "EWU":  {"name": "Eastern Washington", "abbr": "EWU", "bg": "#A10022", "ring": "#1A1A1A", "fg": "#FFFFFF"},
     "KOK":  {"name": "Kokua",          "abbr": "KOK",  "bg": "#1B7F5B", "ring": "#F4D35E", "fg": "#FFFFFF"},
     "WSU":  {"name": "Washington State", "abbr": "WSU", "bg": "#981E32", "ring": "#5E6A71", "fg": "#FFFFFF"},
+    # Women's-only clubs. Colors are placeholders until we know the real ones.
+    "MM":   {"name": "MM",             "abbr": "MM",   "bg": "#4A5568", "ring": "#A0AEC0", "fg": "#FFFFFF"},
+    "BSQ":  {"name": "Butterset Squash", "abbr": "BSQ", "bg": "#C77D1A", "ring": "#2F855A", "fg": "#FFFFFF"},
 }
 
-# team name -> (organization key, small label shown under the badge letters)
-TEAMS = {
+
+@dataclass
+class Division:
+    """One side of the tournament (men's or women's): its own teams, pools, schedule and saved data."""
+    key: str                    # "men" / "women": used in the page link and the database row id
+    name: str                   # "Men's" / "Women's"
+    teams: dict                 # team name -> (organization key, small label shown under the badge letters)
+    pools: dict                 # pool letter -> team names
+    sets_per_match: dict        # pool letter -> number of sets in a pool match
+    schedule: list              # (pool, time, court, team 1, team 2, ref), copied from the tournament sheet
+    bracket_sizes: dict         # starting number of teams in each Sunday bracket (changeable in the app)
+    bracket_count: int = 3      # how many brackets: 1 = Gold, 2 = Gold + Silver, 3 = + Bronze (changeable)
+    all_teams: list = field(init=False)
+    matches: list = field(init=False)
+    courts: list = field(init=False)
+
+    def __post_init__(self):
+        self.all_teams = sorted(self.teams)
+        self.matches = _build_matches(self)
+        self.courts = sorted({m["court"] for m in self.matches})
+        _check(self)
+
+
+def _check(div: Division) -> None:
+    """Catch typos in the facts right away, instead of as wrong standings later."""
+    for pool, teams in div.pools.items():
+        for t in teams:
+            assert t in div.teams, f"{div.name} pool {pool}: unknown team {t!r}"
+    for pool, clock, court, t1, t2, ref in div.schedule:
+        for t in (t1, t2):
+            assert t in div.pools[pool], f"{div.name} {clock} court {court}: {t!r} isn't in pool {pool}"
+        assert ref in div.teams, f"{div.name} {clock} court {court}: unknown ref {ref!r}"
+    for org, _ in div.teams.values():
+        assert org in ORGS, f"{div.name}: unknown organization {org!r}"
+
+
+# ---------- Men's ----------
+
+_MEN_TEAMS = {
     "GU A": ("GU", "A"), "GU B": ("GU", "B"),
     "Whitworth": ("WHIT", ""),
     "McDonald's": ("MCD", ""),
@@ -58,9 +96,8 @@ TEAMS = {
     "Upper Left A": ("UL", "A"), "Upper Left B": ("UL", "B"), "Upper Left C": ("UL", "C"),
     "Upper Left D": ("UL", "D"), "Upper Left E": ("UL", "E"), "Upper Left F": ("UL", "F"),
 }
-ALL_TEAMS = sorted(TEAMS)
 
-POOLS = {
+_MEN_POOLS = {
     "A": ["GU A", "Whitworth", "Upper Left E", "McDonald's"],
     "B": ["Upper Left A", "Griz VB", "UI A", "MSU B"],
     "C": ["UW A", "EWU", "Kokua 18", "Upper Left D"],
@@ -68,10 +105,10 @@ POOLS = {
     "E": ["MSU A", "GU B", "Upper Left F"],
     "F": ["WSU A", "Upper Left B", "Kokua 16"],
 }
-SETS_PER_MATCH = {"A": 2, "B": 2, "C": 2, "D": 2, "E": 3, "F": 3}
+_MEN_SETS = {"A": 2, "B": 2, "C": 2, "D": 2, "E": 3, "F": 3}
 
 # Saturday pool play, copied from the tournament sheet: (pool, time, court, team 1, team 2, ref)
-_SCHEDULE = [
+_MEN_SCHEDULE = [
     ("A", "8:30", 1, "GU A", "Whitworth", "UW A"),
     ("A", "8:30", 2, "McDonald's", "Upper Left E", "Kokua 18"),
     ("A", "10:30", 1, "GU A", "Upper Left E", "Upper Left D"),
@@ -105,6 +142,46 @@ _SCHEDULE = [
 ]
 
 
+# ---------- Women's (from screenshots/womens-schedule-sheet.png) ----------
+
+_WOMEN_TEAMS = {
+    "GU A": ("GU", "A"), "GU B": ("GU", "B"),
+    "Griz VBC": ("GRIZ", "VBC"),
+    "WSU A": ("WSU", "A"), "WSU B": ("WSU", "B"),
+    "UI": ("UI", ""),
+    "Upper Left": ("UL", ""),
+    "MSU A": ("MSU", "A"), "MSU B": ("MSU", "B"),
+    "Butterset Squash": ("BSQ", ""),
+    "MM": ("MM", ""),
+}
+
+_WOMEN_POOLS = {
+    "A": ["GU A", "Griz VBC", "WSU B", "UI"],
+    "B": ["WSU A", "Upper Left", "MSU B", "Butterset Squash"],
+    "C": ["MSU A", "MM", "GU B"],
+}
+_WOMEN_SETS = {"A": 2, "B": 2, "C": 3}
+
+# The sheet's short names: "Griz" = Griz VBC, "Squash" = Butterset Squash, "UL" = Upper Left.
+_WOMEN_SCHEDULE = [
+    ("A", "8:30", 6, "GU A", "UI", "WSU A"),
+    ("A", "8:30", 7, "Griz VBC", "WSU B", "MSU B"),
+    ("A", "10:30", 6, "GU A", "Griz VBC", "Butterset Squash"),
+    ("A", "10:30", 7, "UI", "WSU B", "Upper Left"),
+    ("A", "12:30", 6, "GU A", "WSU B", "MSU B"),
+    ("A", "12:30", 7, "Griz VBC", "UI", "WSU A"),
+    ("B", "9:30", 6, "WSU A", "Butterset Squash", "UI"),
+    ("B", "9:30", 7, "Upper Left", "MSU B", "GU A"),
+    ("B", "11:30", 6, "WSU A", "MSU B", "Griz VBC"),
+    ("B", "11:30", 7, "Upper Left", "Butterset Squash", "WSU B"),
+    ("B", "1:30", 6, "WSU A", "Upper Left", "GU A"),
+    ("B", "1:30", 7, "MSU B", "Butterset Squash", "UI"),
+    ("C", "8:30", 8, "MSU A", "MM", "GU B"),
+    ("C", "10:00", 8, "MSU A", "GU B", "MM"),
+    ("C", "11:30", 8, "MM", "GU B", "MSU A"),
+]
+
+
 def clock_label(minutes: int) -> str:
     """Minutes after midnight -> '1:30 PM'."""
     hour, minute = divmod(minutes, 60)
@@ -119,31 +196,39 @@ def _time_info(clock: str) -> tuple[int, str]:
     return hour * 60 + minute, clock_label(hour * 60 + minute)
 
 
-def _build_matches() -> list[dict]:
+def _build_matches(div: Division) -> list[dict]:
     matches, counter = [], {}
-    for pool, clock, court, t1, t2, ref in _SCHEDULE:
+    for pool, clock, court, t1, t2, ref in div.schedule:
         counter[pool] = counter.get(pool, 0) + 1
         minutes, label = _time_info(clock)
         matches.append({
             "id": f"{pool}{counter[pool]}", "pool": pool, "minutes": minutes, "time": label,
-            "court": court, "team1": t1, "team2": t2, "ref": ref, "sets": SETS_PER_MATCH[pool],
+            "court": court, "team1": t1, "team2": t2, "ref": ref, "sets": div.sets_per_match[pool],
         })
     return sorted(matches, key=lambda m: (m["minutes"], m["court"]))
 
 
-MATCHES = _build_matches()
+DIVISIONS = {
+    "men": Division("men", "Men's", _MEN_TEAMS, _MEN_POOLS, _MEN_SETS, _MEN_SCHEDULE,
+                    bracket_sizes={"Gold": 8, "Silver": 8, "Bronze": 8}),
+    # 11 teams: three brackets of 4 (one BYE). Sizes can be changed in the app's Seeding panel.
+    "women": Division("women", "Women's", _WOMEN_TEAMS, _WOMEN_POOLS, _WOMEN_SETS, _WOMEN_SCHEDULE,
+                      bracket_sizes={"Gold": 4, "Silver": 4, "Bronze": 4}),
+}
+ALL_COURTS = sorted({c for d in DIVISIONS.values() for c in d.courts})
 
 
-def pool_of(team: str) -> str:
-    return next(p for p, teams in POOLS.items() if team in teams)
+def pool_of(div: Division, team: str) -> str:
+    return next(p for p, teams in div.pools.items() if team in teams)
 
 
 # ---------- Storage: the JSON "database" ----------
 
-def empty_data() -> dict:
+def empty_data(div: Division) -> dict:
     return {
         "pool_results": {},  # match id -> [[team1 points, team2 points], ...] one pair per set
-        "brackets": {b: {"size": DEFAULT_BRACKET_SIZE, "seeds": None, "results": {}} for b in BRACKETS},
+        "bracket_count": div.bracket_count,  # how many of Gold / Silver / Bronze are in use
+        "brackets": {b: {"size": div.bracket_sizes[b], "seeds": None, "results": {}} for b in BRACKETS},
         "stats": [],         # list of stat rows (see STAT_FIELDS)
         "refs": {},          # game key -> ref team; overrides the sheet on Saturday (None = unassigned)
         "sunday_schedule": {},  # "Gold:R0M1" -> {"start": minutes after midnight, "court": n}
@@ -152,51 +237,62 @@ def empty_data() -> dict:
 
 # ---------- Storage: Supabase when connected, otherwise data.json ----------
 
-DB_TABLE, DB_ROW = "bulldog_bash", "2026"
-_db = None  # a Supabase client once use_supabase() is called; None means "use data.json"
+# Each division is one row in the same table: "2026-men" and "2026-women".
+DB_TABLE, YEAR = "bulldog_bash", "2026"
+_db = None  # a Supabase client once use_supabase() is called; None means "use local files"
 
 
 def use_supabase(client) -> None:
-    """Save to Supabase (shared by every device) instead of the local data.json file."""
+    """Save to Supabase (shared by every device) instead of local data-<division>.json files."""
     global _db
     _db = client
 
 
-def storage_name() -> str:
-    return "Supabase (shared)" if _db is not None else "data.json on this computer"
+def _row_id(div: Division) -> str:
+    return f"{YEAR}-{div.key}"
 
 
-def _read_saved() -> dict | None:
+def _data_file(div: Division) -> Path:
+    return Path(__file__).parent / f"data-{div.key}.json"
+
+
+def storage_name(div: Division) -> str:
+    return f"Supabase (shared), row {_row_id(div)}" if _db is not None else f"{_data_file(div).name} on this computer"
+
+
+def _read_saved(div: Division) -> dict | None:
     if _db is not None:
-        rows = _db.table(DB_TABLE).select("data").eq("id", DB_ROW).execute().data
+        rows = _db.table(DB_TABLE).select("data").eq("id", _row_id(div)).execute().data
         return rows[0]["data"] if rows else None
-    if DB_FILE.exists():
+    path = _data_file(div)
+    if path.exists():
         try:
-            return json.loads(DB_FILE.read_text())
+            return json.loads(path.read_text())
         except json.JSONDecodeError:
             return None
     return None
 
 
-def load_data() -> dict:
-    data = empty_data()
-    saved = _read_saved()
+def load_data(div: Division) -> dict:
+    data = empty_data(div)
+    saved = _read_saved(div)
     if saved:
         data["pool_results"] = saved.get("pool_results", {})
         data["stats"] = saved.get("stats", [])
         data["refs"] = saved.get("refs", {})
         data["sunday_schedule"] = saved.get("sunday_schedule", {})
+        data["bracket_count"] = saved.get("bracket_count", div.bracket_count)
         for b in BRACKETS:
             data["brackets"][b].update(saved.get("brackets", {}).get(b, {}))
     return data
 
 
-def save_data(data: dict) -> None:
+def save_data(div: Division, data: dict) -> None:
     if _db is not None:
-        _db.table(DB_TABLE).upsert({"id": DB_ROW, "data": data,
+        _db.table(DB_TABLE).upsert({"id": _row_id(div), "data": data,
                                     "updated_at": datetime.now(timezone.utc).isoformat()}).execute()
     else:
-        DB_FILE.write_text(json.dumps(data, indent=2))
+        _data_file(div).write_text(json.dumps(data, indent=2))
 
 
 # ---------- Rules: scoring and standings ----------
@@ -232,11 +328,11 @@ def result_summary(team1: str, team2: str, sets: list) -> str:
     return f"Split {w1}–{w2} ({scores})"
 
 
-def pool_standings(pool: str, pool_results: dict) -> list[dict]:
+def pool_standings(div: Division, pool: str, pool_results: dict) -> list[dict]:
     """Rank a pool by sets won, then point differential, then points scored."""
     rows = {t: {"Team": t, "Played": 0, "Sets W": 0, "Sets L": 0, "Pts For": 0, "Pts Against": 0}
-            for t in POOLS[pool]}
-    for m in MATCHES:
+            for t in div.pools[pool]}
+    for m in div.matches:
         if m["pool"] != pool:
             continue
         sets = played_sets(pool_results.get(m["id"], []))
@@ -264,12 +360,12 @@ def pool_standings(pool: str, pool_results: dict) -> list[dict]:
     return ordered
 
 
-def overall_ranking(pool_results: dict) -> list[str]:
+def overall_ranking(div: Division, pool_results: dict) -> list[str]:
     """Rank every team across pools: pool finish first, then set win %, then point diff per set.
     Percentages and per-set numbers make 3-team and 4-team pools comparable."""
     entries = []
-    for pool in POOLS:
-        for r in pool_standings(pool, pool_results):
+    for pool in div.pools:
+        for r in pool_standings(div, pool, pool_results):
             total_sets = r["Sets W"] + r["Sets L"]
             pct = r["Sets W"] / total_sets if total_sets else 0
             per_set = r["Diff"] / total_sets if total_sets else 0
@@ -279,13 +375,27 @@ def overall_ranking(pool_results: dict) -> list[str]:
 
 # ---------- Rules: Sunday brackets ----------
 
+def active_brackets(data: dict) -> list[str]:
+    """The brackets in use for this division: Gold, then Silver, then Bronze."""
+    return BRACKETS[:data.get("bracket_count", len(BRACKETS))]
+
+
+def bracket_spots(teams: int) -> int:
+    """A single-elimination bracket needs 2, 4, 8 or 16 spots. 6 teams -> 8 spots (2 BYEs)."""
+    spots = 2
+    while spots < teams:
+        spots *= 2
+    return spots
+
+
 def project_seeds(ranking: list[str], sizes: dict[str, int]) -> dict[str, list[str]]:
-    """Fill Gold, then Silver, then Bronze in ranking order. Empty slots become BYEs."""
+    """Fill each bracket in order (Gold first) with its number of teams, in ranking order.
+    Leftover spots become BYEs; they land on the top seeds, who skip the first round."""
     seeds, i = {}, 0
-    for b in BRACKETS:
-        chunk = ranking[i:i + sizes[b]]
-        seeds[b] = chunk + [BYE] * (sizes[b] - len(chunk))
-        i += sizes[b]
+    for b, teams in sizes.items():
+        chunk = ranking[i:i + teams]
+        seeds[b] = chunk + [BYE] * (bracket_spots(teams) - len(chunk))
+        i += teams
     return seeds
 
 
@@ -332,42 +442,42 @@ def resolve_bracket(seeds: list[str], results: dict) -> tuple[list[list[dict]], 
     return rounds, champion
 
 
-def pool_complete(pool: str, pool_results: dict) -> bool:
+def pool_complete(div: Division, pool: str, pool_results: dict) -> bool:
     """True once every match in the pool has a score."""
-    return all(played_sets(pool_results.get(m["id"])) for m in MATCHES if m["pool"] == pool)
+    return all(played_sets(pool_results.get(m["id"])) for m in div.matches if m["pool"] == pool)
 
 
-def projected_seeds(pool_results: dict, sizes: dict[str, int]) -> dict[str, list]:
+def projected_seeds(div: Division, pool_results: dict, sizes: dict[str, int]) -> dict[str, list]:
     """The live projection from pool play. A team stays None (shown as TBD) until every match
     in its pool has a score; its exact seed can still move until all pools are finished."""
-    finished = {t for p in POOLS if pool_complete(p, pool_results) for t in POOLS[p]}
-    seeds = project_seeds(overall_ranking(pool_results), sizes)
+    finished = {t for p in div.pools if pool_complete(div, p, pool_results) for t in div.pools[p]}
+    seeds = project_seeds(overall_ranking(div, pool_results), sizes)
     return {b: [t if t == BYE or t in finished else None for t in s] for b, s in seeds.items()}
 
 
-def bracket_seeds(data: dict) -> dict[str, list]:
+def bracket_seeds(div: Division, data: dict) -> dict[str, list]:
     """Locked seeds where they exist, otherwise the live projection from pool play."""
-    sizes = {b: data["brackets"][b]["size"] for b in BRACKETS}
-    projected = projected_seeds(data["pool_results"], sizes)
-    return {b: data["brackets"][b]["seeds"] or projected[b] for b in BRACKETS}
+    sizes = {b: data["brackets"][b]["size"] for b in active_brackets(data)}
+    projected = projected_seeds(div, data["pool_results"], sizes)
+    return {b: data["brackets"][b]["seeds"] or projected[b] for b in sizes}
 
 
 # ---------- Calendar: every game on one timeline ----------
 
-def build_events(data: dict) -> list[dict]:
+def build_events(div: Division, data: dict) -> list[dict]:
     """One list of every game this weekend: Saturday pool games, plus Sunday bracket games
     that have been given a time. The calendar, refs and overview all read from this."""
     refs = data["refs"]
     events = []
-    for m in MATCHES:
+    for m in div.matches:
         events.append({
             "key": m["id"], "day": "Sat", "start": m["minutes"], "end": m["minutes"] + POOL_MINUTES[m["sets"]],
             "court": m["court"], "teams": [m["team1"], m["team2"]], "label": f"Pool {m['pool']}",
             "group": m["pool"], "ref": refs.get(m["id"], m["ref"]), "sheet_ref": m["ref"],
             "done": bool(played_sets(data["pool_results"].get(m["id"]))),
         })
-    seeds = bracket_seeds(data)
-    for b in BRACKETS:
+    seeds = bracket_seeds(div, data)
+    for b in active_brackets(data):
         rounds, _ = resolve_bracket(seeds[b], data["brackets"][b]["results"])
         for matches in rounds:
             for m in matches:
@@ -404,21 +514,21 @@ def ref_counts(events: list[dict], day: str | None = None) -> Counter:
     return Counter(e["ref"] for e in events if e["ref"] and (day is None or e["day"] == day))
 
 
-def preferred_refs(event: dict, data: dict) -> set[str]:
+def preferred_refs(div: Division, event: dict, data: dict) -> set[str]:
     """On Sunday, teams from the same bracket ('in the pool') are suggested first."""
     if event["day"] == "Sun":
-        return {t for t in bracket_seeds(data)[event["group"]] if t not in (None, BYE)}
+        return {t for t in bracket_seeds(div, data)[event["group"]] if t not in (None, BYE)}
     return set()
 
 
-def suggest_refs(event: dict, events: list[dict], preferred: set[str] = frozenset()) -> list[str]:
+def suggest_refs(div: Division, event: dict, events: list[dict], preferred: set[str] = frozenset()) -> list[str]:
     """Teams that are off during this game, best first: fewest ref duties so far,
     then teams from the same bracket, then alphabetical."""
     busy = busy_teams(event, events)
     counts = ref_counts(events)
     if event["ref"]:
         counts[event["ref"]] -= 1  # don't count this game against its own current ref
-    free = [t for t in ALL_TEAMS if t not in busy]
+    free = [t for t in div.all_teams if t not in busy]
     return sorted(free, key=lambda t: (counts[t], t not in preferred, t))
 
 
@@ -433,15 +543,15 @@ def ref_problem(event: dict, events: list[dict]) -> str | None:
     return None
 
 
-def auto_assign_refs(data: dict, day: str = "Sun") -> int:
+def auto_assign_refs(div: Division, data: dict, day: str = "Sun") -> int:
     """Give every unassigned game on this day the top suggested ref, in time order.
     Counts are recalculated after each pick so duty spreads out evenly."""
     assigned = 0
     while True:
-        events = build_events(data)
+        events = build_events(div, data)
         todo = [e for e in events if e["day"] == day and not e["ref"]]
         for e in todo:
-            options = suggest_refs(e, events, preferred_refs(e, data))
+            options = suggest_refs(div, e, events, preferred_refs(div, e, data))
             if options:
                 data["refs"][e["key"]] = options[0]
                 assigned += 1
