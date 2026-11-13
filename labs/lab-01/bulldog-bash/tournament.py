@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import re
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 
 DB_FILE = Path(__file__).parent / "data.json"
@@ -149,13 +150,38 @@ def empty_data() -> dict:
     }
 
 
-def load_data() -> dict:
-    data = empty_data()
+# ---------- Storage: Supabase when connected, otherwise data.json ----------
+
+DB_TABLE, DB_ROW = "bulldog_bash", "2026"
+_db = None  # a Supabase client once use_supabase() is called; None means "use data.json"
+
+
+def use_supabase(client) -> None:
+    """Save to Supabase (shared by every device) instead of the local data.json file."""
+    global _db
+    _db = client
+
+
+def storage_name() -> str:
+    return "Supabase (shared)" if _db is not None else "data.json on this computer"
+
+
+def _read_saved() -> dict | None:
+    if _db is not None:
+        rows = _db.table(DB_TABLE).select("data").eq("id", DB_ROW).execute().data
+        return rows[0]["data"] if rows else None
     if DB_FILE.exists():
         try:
-            saved = json.loads(DB_FILE.read_text())
+            return json.loads(DB_FILE.read_text())
         except json.JSONDecodeError:
-            return data
+            return None
+    return None
+
+
+def load_data() -> dict:
+    data = empty_data()
+    saved = _read_saved()
+    if saved:
         data["pool_results"] = saved.get("pool_results", {})
         data["stats"] = saved.get("stats", [])
         data["refs"] = saved.get("refs", {})
@@ -166,7 +192,11 @@ def load_data() -> dict:
 
 
 def save_data(data: dict) -> None:
-    DB_FILE.write_text(json.dumps(data, indent=2))
+    if _db is not None:
+        _db.table(DB_TABLE).upsert({"id": DB_ROW, "data": data,
+                                    "updated_at": datetime.now(timezone.utc).isoformat()}).execute()
+    else:
+        DB_FILE.write_text(json.dumps(data, indent=2))
 
 
 # ---------- Rules: scoring and standings ----------
@@ -302,10 +332,23 @@ def resolve_bracket(seeds: list[str], results: dict) -> tuple[list[list[dict]], 
     return rounds, champion
 
 
-def bracket_seeds(data: dict) -> dict[str, list[str]]:
+def pool_complete(pool: str, pool_results: dict) -> bool:
+    """True once every match in the pool has a score."""
+    return all(played_sets(pool_results.get(m["id"])) for m in MATCHES if m["pool"] == pool)
+
+
+def projected_seeds(pool_results: dict, sizes: dict[str, int]) -> dict[str, list]:
+    """The live projection from pool play. A team stays None (shown as TBD) until every match
+    in its pool has a score; its exact seed can still move until all pools are finished."""
+    finished = {t for p in POOLS if pool_complete(p, pool_results) for t in POOLS[p]}
+    seeds = project_seeds(overall_ranking(pool_results), sizes)
+    return {b: [t if t == BYE or t in finished else None for t in s] for b, s in seeds.items()}
+
+
+def bracket_seeds(data: dict) -> dict[str, list]:
     """Locked seeds where they exist, otherwise the live projection from pool play."""
     sizes = {b: data["brackets"][b]["size"] for b in BRACKETS}
-    projected = project_seeds(overall_ranking(data["pool_results"]), sizes)
+    projected = projected_seeds(data["pool_results"], sizes)
     return {b: data["brackets"][b]["seeds"] or projected[b] for b in BRACKETS}
 
 
@@ -364,7 +407,7 @@ def ref_counts(events: list[dict], day: str | None = None) -> Counter:
 def preferred_refs(event: dict, data: dict) -> set[str]:
     """On Sunday, teams from the same bracket ('in the pool') are suggested first."""
     if event["day"] == "Sun":
-        return {t for t in bracket_seeds(data)[event["group"]] if t != BYE}
+        return {t for t in bracket_seeds(data)[event["group"]] if t not in (None, BYE)}
     return set()
 
 

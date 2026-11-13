@@ -17,6 +17,24 @@ st.set_page_config(page_title="Bulldog Bash 2026", page_icon="🏐", layout="wid
 NAVY, RED = "#041E42", "#C8102E"
 LOGO_DIR = Path(__file__).parent / "logos"
 
+
+# ---------- Storage ----------
+# With SUPABASE_URL and SUPABASE_KEY in Streamlit secrets, every device shares one copy of the scores.
+# Without them (e.g. on a laptop with no secrets.toml), the app falls back to data.json.
+
+@st.cache_resource
+def supabase_client(url: str, key: str):
+    from supabase import create_client
+    return create_client(url, key)
+
+
+try:
+    _url, _key = st.secrets["SUPABASE_URL"], st.secrets["SUPABASE_KEY"]
+except Exception:  # no secrets file, or the keys aren't in it
+    _url = _key = None
+if _url and _key:
+    tm.use_supabase(supabase_client(_url, _key))
+
 st.markdown(f"""<style>
 .bb-hero {{background: linear-gradient(135deg, {NAVY} 0%, #0B2D5C 100%); color: #fff; padding: 1.3rem 1.6rem;
   border-radius: 14px; border-bottom: 6px solid {RED}; margin-bottom: 1rem;}}
@@ -24,7 +42,9 @@ st.markdown(f"""<style>
 .bb-kicker {{letter-spacing: .14em; font-size: .78rem; font-weight: 700; color: #C9D3E3;}}
 .bb-sub {{color: #DCE3EE;}}
 .bb-chip {{display: inline-flex; align-items: center; gap: .45rem; vertical-align: middle;}}
-.bb-chip img {{flex: none;}}
+.bb-chip img {{flex: none; object-fit: contain;}}
+.bb-hero-logo {{height: 1.15em; width: auto; vertical-align: -.15em; margin-right: .2em;}}
+.bb-icon {{height: 1.2em; width: auto; vertical-align: -.25em;}}
 .bb-tbd {{color: #8A94A6; font-style: italic;}}
 .bb-table {{width: 100%; border-collapse: collapse; font-size: .92rem;}}
 .bb-table th {{background: {NAVY}; color: #fff; padding: .45rem .5rem; text-align: center; font-weight: 600;}}
@@ -45,7 +65,6 @@ st.markdown(f"""<style>
 .bb-slot.win {{background: #EAF0F8; font-weight: 700;}}
 .bb-slot.lose {{opacity: .55;}}
 .bb-champ {{text-align: center; border: 2px solid {RED}; border-radius: 14px; padding: 1rem; background: #FFF8F9;}}
-.bb-card {{border: 1px solid #D6DDE8; border-top: 5px solid {RED}; border-radius: 12px; padding: .8rem 1rem; background: #fff;}}
 .bb-pool {{border: 1px solid #D6DDE8; border-radius: 12px; padding: .6rem .8rem; background: #F7F9FC; margin-bottom: .6rem;}}
 .bb-pool b {{color: {NAVY};}}
 .bb-pool div {{margin: .3rem 0;}}
@@ -68,6 +87,21 @@ st.markdown(f"""<style>
 .bb-list div {{margin: .3rem 0;}}
 .bb-list-title {{font-weight: 700; color: {NAVY}; border-bottom: 2px solid {RED}; margin-bottom: .3rem;}}
 .bb-table tr.zero td {{background: #FFF6DB;}}
+/* Score forms: keep each set on one line on phones (Streamlit normally stacks columns under 640px). */
+[data-testid="stForm"] [data-testid="stHorizontalBlock"] {{flex-wrap: nowrap !important; gap: .5rem;}}
+[data-testid="stForm"] [data-testid="stColumn"] {{min-width: 0 !important; width: auto !important;}}
+[data-testid="stForm"] [data-testid="stColumn"]:first-child {{flex: 1 1 0 !important;}}
+[data-testid="stForm"] [data-testid="stColumn"]:not(:first-child) {{flex: 2 1 0 !important;}}
+[data-testid="stForm"] [data-testid="stHorizontalBlock"]:last-child [data-testid="stColumn"] {{flex: 1 1 0 !important;}}
+[data-testid="stForm"] input[type="number"] {{font-size: 16px;}}  /* 16px stops iPhones zooming in on tap */
+@media (max-width: 640px) {{
+  .bb-hero {{padding: 1rem;}}
+  .bb-hero h1 {{font-size: 1.6rem;}}
+  [data-testid="stForm"] .bb-chip {{flex-direction: column; align-items: flex-start; gap: .15rem;
+    font-size: .9rem; line-height: 1.2; word-break: normal; overflow-wrap: normal;}}
+  [data-testid="stForm"] button[data-testid="stNumberInputStepDown"],
+  [data-testid="stForm"] button[data-testid="stNumberInputStepUp"] {{display: none;}}
+}}
 </style>""", unsafe_allow_html=True)
 
 MEDALS = {"Gold": "🥇", "Silver": "🥈", "Bronze": "🥉"}
@@ -94,12 +128,20 @@ def badge_svg(team: str) -> str:
             f'font-weight="900" font-size="{font}" fill="{org["fg"]}">{html.escape(abbr)}</text>{sub}</svg>')
 
 
+def image_uri(path: Path) -> str:
+    """A PNG file turned into text the browser can show inline (a 'data URI')."""
+    return "data:image/png;base64," + base64.b64encode(path.read_bytes()).decode()
+
+
 def logo_uri(team: str) -> str:
     """Use a real logo from logos/<ORG>.png if one has been added, otherwise the drawn badge."""
     custom = LOGO_DIR / f"{tm.TEAMS[team][0]}.png"
     if custom.exists():
-        return "data:image/png;base64," + base64.b64encode(custom.read_bytes()).decode()
+        return image_uri(custom)
     return "data:image/svg+xml;base64," + base64.b64encode(badge_svg(team).encode()).decode()
+
+
+REF_ICON = f'<img class="bb-icon" src="{image_uri(LOGO_DIR / "ref-shirt.png")}" alt="Ref">'
 
 
 def chip(team: str | None, size: int = 30) -> str:
@@ -119,23 +161,29 @@ def show_html(markup: str) -> None:
 # ---------- Score entry (shared by pool play and brackets) ----------
 
 def score_form(key: str, team1: str, team2: str, n_sets: int, current: list, on_save) -> None:
-    """A small form: one row per set, two number boxes, Save and Clear buttons."""
+    """A small form: one row per set, two number boxes, Save and Clear buttons.
+
+    2-set pool matches also get an optional Set 3 row; left at 0-0 it doesn't count.
+    """
+    rows = max(n_sets, 3)
     with st.form(key):
-        head = st.columns([1, 2, 2])
-        head[1].markdown(chip(team1, 34), unsafe_allow_html=True)
-        head[2].markdown(chip(team2, 34), unsafe_allow_html=True)
+        head = st.columns([1, 2, 2], vertical_alignment="center")
+        head[1].markdown(chip(team1, 28), unsafe_allow_html=True)
+        head[2].markdown(chip(team2, 28), unsafe_allow_html=True)
         new_sets = []
-        for i in range(n_sets):
+        for i in range(rows):
             prev = current[i] if i < len(current) else [0, 0]
-            row = st.columns([1, 2, 2])
-            row[0].markdown(f"**Set {i + 1}**")
+            row = st.columns([1, 2, 2], vertical_alignment="center")
+            optional = i >= n_sets
+            row[0].markdown(f"**Set {i + 1}**" + ('<br><small>if played</small>' if optional else ""),
+                            unsafe_allow_html=True)
             # The saved value is part of the key, so the boxes refresh after Save or Clear.
             a = row[1].number_input(f"{team1} set {i + 1}", 0, 99, int(prev[0]), key=f"{key}_{i}a_{prev[0]}",
                                     label_visibility="collapsed")
             b = row[2].number_input(f"{team2} set {i + 1}", 0, 99, int(prev[1]), key=f"{key}_{i}b_{prev[1]}",
                                     label_visibility="collapsed")
             new_sets.append([int(a), int(b)])
-        save_col, clear_col, _ = st.columns([1, 1, 3])
+        save_col, clear_col, _ = st.columns([1, 1, 1])
         saved = save_col.form_submit_button("💾 Save", type="primary")
         cleared = clear_col.form_submit_button("Clear")
     if saved:
@@ -157,11 +205,19 @@ results = data["pool_results"]
 events = tm.build_events(data)  # every game this weekend, shared by Overview, Calendar and Refs
 
 show_html(f"""<div class="bb-hero"><div class="bb-kicker">GONZAGA MEN'S CLUB VOLLEYBALL</div>
-<h1>🐾 Bulldog Bash 2026</h1>
+<h1><img class="bb-hero-logo" src="{image_uri(LOGO_DIR / "GU.png")}" alt="Gonzaga"> Bulldog Bash 2026</h1>
 <div class="bb-sub">Sat Nov 14 · Pool play &nbsp;|&nbsp; Sun Nov 15 · Gold, Silver &amp; Bronze brackets &nbsp;|&nbsp; Go Zags!</div></div>""")
 
+# Tab labels can only be text, so CSS draws the ref shirt in front of the 5th top-level tab ("Refs").
+# ":not(stTabPanel *)" skips the tab rows nested inside a tab (like Pool A-F), where Pool E is also 5th.
+show_html(f"""<style>
+[data-testid="stTab"]:nth-of-type(5):not([data-testid="stTabPanel"] *) p::before {{
+  content: ""; display: inline-block; width: 1.25em; height: 1.25em; margin-right: .35em;
+  vertical-align: -.25em; background: url("{image_uri(LOGO_DIR / "ref-shirt.png")}") center / contain no-repeat;}}
+</style>""")
+
 tab_home, tab_cal, tab_pools, tab_bracket, tab_refs, tab_stats = st.tabs(
-    ["🏠 Overview", "📅 Calendar", "🏐 Pool Play · Sat 11/14", "🏆 Sunday Bracket · 11/15", "🦓 Refs", "📊 Stats"])
+    ["🏠 Overview", "📅 Calendar", "🏐 Pool Play · Sat 11/14", "🏆 Sunday Bracket · 11/15", "Refs", "📊 Stats"])
 
 
 # ---------- Overview ----------
@@ -174,24 +230,8 @@ with tab_home:
     c3.metric("Pool matches done", f"{done} / {len(tm.MATCHES)}")
     c4.metric("Courts", len({m["court"] for m in tm.MATCHES}))
 
-    st.markdown("### 🐶 Zags spotlight")
     upcoming_events = [e for e in events if not e["done"]]
-
-    def when(e):
-        return f'{e["day"]} {tm.clock_label(e["start"])} · Court {e["court"]}'
-
-    for team, col in zip(["GU A", "GU B"], st.columns(2)):
-        pool = tm.pool_of(team)
-        row = next(r for r in tm.pool_standings(pool, results) if r["Team"] == team)
-        nxt = next((e for e in upcoming_events if team in e["teams"]), None)
-        ref = next((e for e in upcoming_events if e["ref"] == team), None)
-        opponent = next((t for t in nxt["teams"] if t != team), None) if nxt else None
-        nxt_txt = f'{when(nxt)} vs {opponent or "TBD"}' if nxt else "Nothing scheduled"
-        ref_txt = when(ref) if ref else "None scheduled"
-        col.markdown(f"""<div class="bb-card">{chip(team, 46)}<br><br>
-<b>Pool {pool}</b> · Place {row["Place"]} · Sets {row["Sets W"]}–{row["Sets L"]} · Diff {row["Diff"]:+d}<br>
-<b>Next match:</b> {html.escape(nxt_txt)}<br><b>Next ref duty:</b> {html.escape(ref_txt)}</div>""",
-                     unsafe_allow_html=True)
+    st.caption(f"Scores are saved to: **{tm.storage_name()}**")
 
     st.markdown("### ⏱️ Up next")
     if upcoming_events:
@@ -293,7 +333,7 @@ with tab_bracket:
                "differential per set. Gold takes the top seeds, then Silver, then Bronze. "
                "Bracket matches are best of 3.")
     sizes = {b: data["brackets"][b]["size"] for b in tm.BRACKETS}
-    projected = tm.project_seeds(tm.overall_ranking(results), sizes)
+    projected = tm.projected_seeds(results, sizes)
     medals = MEDALS
 
     for name, btab in zip(tm.BRACKETS, st.tabs([f"{medals[b]} {b}" for b in tm.BRACKETS])):
@@ -302,11 +342,12 @@ with tab_bracket:
             locked = bracket["seeds"] is not None
             seeds = bracket["seeds"] if locked else projected[name]
             if not locked:
-                st.info("**Projected bracket.** It updates live as pool scores come in. When pool play "
-                        "is final, open **⚙️ Seeding** below and click **Lock in seeds** to start "
-                        "entering Sunday scores.")
+                st.info("**Projected bracket.** Teams show as TBD until every match in their pool has a "
+                        "score. Seeds can still shift until all pools are finished. When pool play is "
+                        "final, open **⚙️ Seeding** below and click **Lock in seeds** to start entering "
+                        "Sunday scores.")
             rounds, champion = tm.resolve_bracket(seeds, bracket["results"])
-            seed_of = {t: i + 1 for i, t in enumerate(seeds) if t != tm.BYE}
+            seed_of = {t: i + 1 for i, t in enumerate(seeds) if t not in (None, tm.BYE)}
             show_html(bracket_html(rounds, champion, seed_of, medals[name]))
 
             if locked:
@@ -335,16 +376,19 @@ with tab_bracket:
                         bracket["seeds"] = (bracket["seeds"] + [tm.BYE] * size)[:size]
                     tm.save_data(data)
                     st.rerun()
-                options = [tm.BYE] + tm.ALL_TEAMS
+                options = [None, tm.BYE] + tm.ALL_TEAMS  # None = TBD (its pool isn't finished yet)
                 with st.form(f"seeds_{name}"):
                     st.caption("Change any seed by hand, then lock them in. Empty slots should be BYE.")
                     grid = st.columns(2)
                     new_seeds = []
                     for i, current in enumerate(seeds):
                         new_seeds.append(grid[i % 2].selectbox(
-                            f"Seed {i + 1}", options, index=options.index(current), key=f"seed_{name}_{i}_{current}"))
+                            f"Seed {i + 1}", options, index=options.index(current), key=f"seed_{name}_{i}_{current}",
+                            format_func=lambda t: "TBD" if t is None else t))
                     lock = st.form_submit_button("🔒 Lock in seeds", type="primary")
-                if lock:
+                if lock and None in new_seeds:
+                    st.error("Some seeds are still TBD. Pick a team or BYE for every seed before locking.")
+                elif lock:
                     real = [t for t in new_seeds if t != tm.BYE]
                     elsewhere = {t for b in tm.BRACKETS if b != name and data["brackets"][b]["seeds"]
                                  for t in data["brackets"][b]["seeds"] if t != tm.BYE}
@@ -368,7 +412,7 @@ def event_card(e: dict) -> str:
     ref = html.escape(e["ref"]) if e["ref"] else '<span class="bb-tbd">needs ref</span>'
     return (f'<div class="bb-ev" style="background:{GROUP_COLORS[e["group"]]}">'
             f'<div class="bb-ev-label">{e["label"]}{" ✅" if e["done"] else ""}</div>'
-            f'<div>{chip(a, 22)}</div><div>{chip(b, 22)}</div><div class="bb-ev-ref">🦓 Ref: {ref}</div></div>')
+            f'<div>{chip(a, 22)}</div><div>{chip(b, 22)}</div><div class="bb-ev-ref">{REF_ICON} Ref: {ref}</div></div>')
 
 
 def calendar_grid(day_events: list) -> str:
@@ -508,7 +552,7 @@ with tab_refs:
             off = sorted((t for t in tm.ALL_TEAMS if t not in playing and t not in reffing),
                          key=lambda t: (counts[t], t))
             c1, c2, c3 = st.columns(3)
-            for col, title, teams in [(c1, "🏐 Playing", playing), (c2, "🦓 Reffing", reffing), (c3, "😴 Off", off)]:
+            for col, title, teams in [(c1, "🏐 Playing", playing), (c2, f"{REF_ICON} Reffing", reffing), (c3, "😴 Off", off)]:
                 items = "".join(f"<div>{chip(t, 22)}" + (f" <small>({counts[t]})</small>" if col is c3 else "")
                                 + "</div>" for t in teams) or '<div class="bb-tbd">nobody</div>'
                 col.markdown(f'<div class="bb-list"><div class="bb-list-title">{title}</div>{items}</div>',
@@ -525,7 +569,7 @@ with tab_refs:
         st.caption("Highlighted teams haven't reffed yet.")
 
     with board:
-        st.markdown("### 🦓 Ref board")
+        st.markdown(f"### {REF_ICON} Ref board", unsafe_allow_html=True)
         if day == "Sat":
             st.caption("Saturday refs come from the tournament sheet. Change one if a team can't make it; "
                        "the list only shows teams that are off at that time. ⭐ = fewest ref duties so far.")

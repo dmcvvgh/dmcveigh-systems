@@ -1,2 +1,5 @@
 # tournament results and stats entered in the app
 data.json
+
+# Supabase keys (set these in Streamlit Cloud > Settings > Secrets when deployed)
+.streamlit/secrets.toml
