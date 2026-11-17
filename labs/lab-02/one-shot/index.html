@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Problem Tracker</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --panel: #ffffff; --text: #1d2330; --muted: #677085;
+    --border: #dde1e8; --accent: #3358d4; --accent-text: #ffffff;
+    --danger: #c62f3b; --shadow: 0 1px 3px rgba(0,0,0,.08);
+    --p-low: #2e8b57; --p-medium: #b8860b; --p-high: #d2691e; --p-critical: #c62f3b;
+    --s-open: #3358d4; --s-progress: #8a4fd1; --s-resolved: #2e8b57; --s-closed: #677085;
+  }
+  [data-theme="dark"] {
+    --bg: #14171f; --panel: #1d212b; --text: #e6e9f0; --muted: #98a1b5;
+    --border: #2f3542; --accent: #6d8cff; --accent-text: #0e1220;
+    --danger: #ff6b76; --shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+         background: var(--bg); color: var(--text); line-height: 1.45; }
+  header { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+           padding: 14px 20px; background: var(--panel); border-bottom: 1px solid var(--border); }
+  header h1 { margin: 0; font-size: 1.3rem; }
+  main { max-width: 1100px; margin: 0 auto; padding: 20px 16px 60px; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; border: 1px solid var(--border); background: var(--panel);
+           padding: 7px 12px; border-radius: 6px; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+  button.danger { color: var(--danger); }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 1px; }
+  input, select, textarea { background: var(--panel); border: 1px solid var(--border);
+           border-radius: 6px; padding: 7px 9px; width: 100%; }
+  textarea { resize: vertical; min-height: 80px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 12px; box-shadow: var(--shadow); }
+  .stat .n { font-size: 1.6rem; font-weight: 700; }
+  .stat .l { color: var(--muted); font-size: .85rem; }
+
+  .toolbar { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+  @media (max-width: 760px) { .toolbar { grid-template-columns: 1fr 1fr; } .toolbar .search { grid-column: 1 / -1; } }
+
+  .list { display: flex; flex-direction: column; gap: 10px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-left: 5px solid var(--border);
+          border-radius: 8px; padding: 12px 14px; box-shadow: var(--shadow); cursor: pointer; }
+  .card:hover { border-color: var(--accent); }
+  .card.p-low { border-left-color: var(--p-low); } .card.p-medium { border-left-color: var(--p-medium); }
+  .card.p-high { border-left-color: var(--p-high); } .card.p-critical { border-left-color: var(--p-critical); }
+  .card-top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+  .card h3 { margin: 0; font-size: 1.05rem; }
+  .card .id { color: var(--muted); font-size: .85rem; font-weight: 400; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: .8rem; color: var(--muted); align-items: center; }
+  .badge { padding: 2px 8px; border-radius: 999px; font-size: .75rem; font-weight: 600; color: #fff; }
+  .s-Open { background: var(--s-open); } .s-InProgress { background: var(--s-progress); }
+  .s-Resolved { background: var(--s-resolved); } .s-Closed { background: var(--s-closed); }
+  .pr-Low { background: var(--p-low); } .pr-Medium { background: var(--p-medium); }
+  .pr-High { background: var(--p-high); } .pr-Critical { background: var(--p-critical); }
+  .tag { border: 1px solid var(--border); padding: 1px 7px; border-radius: 999px; }
+  .overdue { color: var(--danger); font-weight: 600; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 10px; border: 2px dashed var(--border); border-radius: 8px; }
+
+  dialog { border: 1px solid var(--border); border-radius: 10px; padding: 0; width: min(640px, 94vw);
+           background: var(--panel); color: var(--text); }
+  dialog::backdrop { background: rgba(0,0,0,.45); }
+  .dlg-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .dlg-head h2 { margin: 0; font-size: 1.15rem; }
+  .dlg-body { padding: 16px 18px; max-height: 70vh; overflow-y: auto; }
+  .dlg-foot { padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+  label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 4px; }
+  .field { margin-bottom: 12px; }
+  .req { color: var(--danger); }
+  .error { color: var(--danger); font-size: .8rem; margin-top: 3px; }
+  .detail-desc { white-space: pre-wrap; background: var(--bg); padding: 10px; border-radius: 6px; margin: 8px 0 14px; }
+  .comments, .history { list-style: none; padding: 0; margin: 6px 0 14px; }
+  .comments li { background: var(--bg); padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; white-space: pre-wrap; }
+  .comments small, .history li { color: var(--muted); font-size: .8rem; }
+  .history li { padding: 3px 0; border-bottom: 1px dashed var(--border); }
+  h4 { margin: 14px 0 4px; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg);
+           padding: 9px 16px; border-radius: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Problem Tracker</h1>
+  <div class="actions">
+    <button class="primary" id="newBtn">+ New problem</button>
+    <button id="exportBtn" title="Download all problems as a JSON file">Export</button>
+    <button id="importBtn" title="Load problems from a JSON file">Import</button>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+    <button id="themeBtn" aria-label="Toggle dark mode">Dark mode</button>
+  </div>
+</header>
+
+<main>
+  <section class="stats" id="stats" aria-label="Summary"></section>
+
+  <section class="toolbar" aria-label="Search and filters">
+    <div class="search">
+      <label class="sr-only" for="search">Search</label>
+      <input id="search" type="search" placeholder="Search title, description, tags, assignee…">
+    </div>
+    <div><label class="sr-only" for="fStatus">Status</label>
+      <select id="fStatus"><option value="">All statuses</option></select></div>
+    <div><label class="sr-only" for="fPriority">Priority</label>
+      <select id="fPriority"><option value="">All priorities</option></select></div>
+    <div><label class="sr-only" for="fCategory">Category</label>
+      <select id="fCategory"><option value="">All categories</option></select></div>
+    <div><label class="sr-only" for="sortBy">Sort</label>
+      <select id="sortBy">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="priority">Priority (high→low)</option>
+        <option value="due">Due date (soonest)</option>
+        <option value="updated">Recently updated</option>
+        <option value="title">Title (A→Z)</option>
+      </select></div>
+  </section>
+
+  <section class="list" id="list" aria-live="polite"></section>
+</main>
+
+<!-- Create / edit dialog -->
+<dialog id="formDlg">
+  <form id="form" novalidate>
+    <div class="dlg-head"><h2 id="formTitle">New problem</h2>
+      <button type="button" data-close aria-label="Close">✕</button></div>
+    <div class="dlg-body">
+      <div class="field"><label for="title">Title <span class="req">*</span></label>
+        <input id="title" maxlength="120" required><div class="error" id="titleErr"></div></div>
+      <div class="field"><label for="description">Description</label>
+        <textarea id="description" placeholder="What happened? Steps to reproduce? Expected vs. actual?"></textarea></div>
+      <div class="grid2">
+        <div class="field"><label for="status">Status</label><select id="status"></select></div>
+        <div class="field"><label for="priority">Priority</label><select id="priority"></select></div>
+        <div class="field"><label for="category">Category</label><select id="category"></select></div>
+        <div class="field"><label for="dueDate">Due date</label><input id="dueDate" type="date"></div>
+        <div class="field"><label for="reporter">Reported by</label><input id="reporter" maxlength="60"></div>
+        <div class="field"><label for="assignee">Assigned to</label><input id="assignee" maxlength="60"></div>
+      </div>
+      <div class="field"><label for="tags">Tags (comma-separated)</label>
+        <input id="tags" placeholder="login, mobile, urgent"></div>
+    </div>
+    <div class="dlg-foot">
+      <span></span>
+      <div class="actions"><button type="button" data-close>Cancel</button>
+        <button type="submit" class="primary">Save</button></div>
+    </div>
+  </form>
+</dialog>
+
+<!-- Detail dialog -->
+<dialog id="detailDlg">
+  <div class="dlg-head"><h2 id="dTitle"></h2><button type="button" data-close aria-label="Close">✕</button></div>
+  <div class="dlg-body" id="dBody"></div>
+  <div class="dlg-foot">
+    <button class="danger" id="deleteBtn">Delete</button>
+    <div class="actions"><button id="editBtn">Edit</button><button class="primary" data-close>Done</button></div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(() => {
+  // ---------- Constants ----------
+  const STORAGE_KEY = 'problemTracker.v1';
+  const THEME_KEY = 'problemTracker.theme';
+  const STATUSES = ['Open', 'In Progress', 'Resolved', 'Closed'];
+  const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
+  const CATEGORIES = ['Bug', 'Hardware', 'Software', 'Network', 'Access', 'Facilities', 'Other'];
+  const PRIORITY_RANK = { Low: 0, Medium: 1, High: 2, Critical: 3 };
+
+  // ---------- Helpers ----------
+  const $ = (sel) => document.querySelector(sel);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+  const now = () => new Date().toISOString();
+  const fmt = (iso) => iso ? new Date(iso).toLocaleString() : '';
+  const today = () => new Date().toISOString().slice(0, 10);
+  const isOverdue = (p) => p.dueDate && p.dueDate < today() && !['Resolved', 'Closed'].includes(p.status);
+  const fillSelect = (el, values) => values.forEach(v => el.add(new Option(v, v)));
+
+  function toast(msg) {
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ---------- Storage ----------
+  let state = load();
+  let editingId = null;   // id being edited in form, or null for new
+  let viewingId = null;   // id open in detail view
+
+  function load() {
+    try {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (data && Array.isArray(data.problems)) return data;
+    } catch (e) { console.warn('Could not read saved data', e); }
+    return { nextId: 1, problems: [] };
+  }
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { toast('Could not save — storage may be full or blocked.'); }
+  }
+  const find = (id) => state.problems.find(p => p.id === id);
+
+  // ---------- Rendering ----------
+  function renderStats() {
+    const ps = state.problems;
+    const count = (fn) => ps.filter(fn).length;
+    const items = [
+      ['Total', ps.length],
+      ['Open', count(p => p.status === 'Open')],
+      ['In Progress', count(p => p.status === 'In Progress')],
+      ['Resolved / Closed', count(p => p.status === 'Resolved' || p.status === 'Closed')],
+      ['Critical (active)', count(p => p.priority === 'Critical' && !['Resolved', 'Closed'].includes(p.status))],
+      ['Overdue', count(isOverdue)],
+    ];
+    $('#stats').innerHTML = items.map(([l, n]) =>
+      `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+  }
+
+  function filtered() {
+    const q = $('#search').value.trim().toLowerCase();
+    const fs = $('#fStatus').value, fp = $('#fPriority').value, fc = $('#fCategory').value;
+    const list = state.problems.filter(p => {
+      if (fs && p.status !== fs) return false;
+      if (fp && p.priority !== fp) return false;
+      if (fc && p.category !== fc) return false;
+      if (q) {
+        const hay = [p.title, p.description, p.reporter, p.assignee, (p.tags || []).join(' '), '#' + p.id]
+          .join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    const sorters = {
+      newest: (a, b) => b.createdAt.localeCompare(a.createdAt),
+      oldest: (a, b) => a.createdAt.localeCompare(b.createdAt),
+      updated: (a, b) => b.updatedAt.localeCompare(a.updatedAt),
+      priority: (a, b) => PRIORITY_RANK[b.priority] - PRIORITY_RANK[a.priority] || b.createdAt.localeCompare(a.createdAt),
+      due: (a, b) => (a.dueDate || '9999') .localeCompare(b.dueDate || '9999'),
+      title: (a, b) => a.title.localeCompare(b.title),
+    };
+    return list.sort(sorters[$('#sortBy').value]);
+  }
+
+  function renderList() {
+    const list = filtered();
+    const el = $('#list');
+    if (!state.problems.length) {
+      el.innerHTML = `<div class="empty">No problems logged yet. Click <b>+ New problem</b> to add the first one.</div>`;
+      return;
+    }
+    if (!list.length) { el.innerHTML = `<div class="empty">No problems match your search or filters.</div>`; return; }
+    el.innerHTML = list.map(p => `
+      <article class="card p-${p.priority.toLowerCase()}" tabindex="0" data-id="${p.id}"
+               aria-label="Problem ${p.id}: ${esc(p.title)}">
+        <div class="card-top">
+          <h3>${esc(p.title)} <span class="id">#${p.id}</span></h3>
+          <span class="badge s-${p.status.replace(/ /g, "")}">${p.status}</span>
+        </div>
+        <div class="meta">
+          <span class="badge pr-${p.priority}">${p.priority}</span>
+          <span>${esc(p.category)}</span>
+          ${p.assignee ? `<span>→ ${esc(p.assignee)}</span>` : '<span>Unassigned</span>'}
+          ${p.dueDate ? `<span class="${isOverdue(p) ? 'overdue' : ''}">Due ${p.dueDate}${isOverdue(p) ? ' (overdue)' : ''}</span>` : ''}
+          ${(p.comments || []).length ? `<span>💬 ${p.comments.length}</span>` : ''}
+          ${(p.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}
+        </div>
+      </article>`).join('');
+  }
+
+  function render() { renderStats(); renderList(); }
+
+  // ---------- Create / edit ----------
+  function openForm(id = null) {
+    editingId = id;
+    const p = id ? find(id) : null;
+    $('#formTitle').textContent = p ? `Edit problem #${p.id}` : 'New problem';
+    $('#title').value = p?.title || '';
+    $('#description').value = p?.description || '';
+    $('#status').value = p?.status || 'Open';
+    $('#priority').value = p?.priority || 'Medium';
+    $('#category').value = p?.category || 'Bug';
+    $('#dueDate').value = p?.dueDate || '';
+    $('#reporter').value = p?.reporter || '';
+    $('#assignee').value = p?.assignee || '';
+    $('#tags').value = (p?.tags || []).join(', ');
+    $('#titleErr').textContent = '';
+    $('#formDlg').showModal();
+    $('#title').focus();
+  }
+
+  $('#form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = $('#title').value.trim();
+    if (!title) { $('#titleErr').textContent = 'Title is required.'; $('#title').focus(); return; }
+
+    const fields = {
+      title,
+      description: $('#description').value.trim(),
+      status: $('#status').value,
+      priority: $('#priority').value,
+      category: $('#category').value,
+      dueDate: $('#dueDate').value,
+      reporter: $('#reporter').value.trim(),
+      assignee: $('#assignee').value.trim(),
+      tags: [...new Set($('#tags').value.split(',').map(t => t.trim()).filter(Boolean))],
+    };
+
+    if (editingId) {
+      const p = find(editingId);
+      const changes = [];
+      for (const k of ['title', 'status', 'priority', 'category', 'dueDate', 'assignee']) {
+        if (p[k] !== fields[k]) changes.push(`${k}: "${p[k] || '—'}" → "${fields[k] || '—'}"`);
+      }
+      Object.assign(p, fields, { updatedAt: now() });
+      if (fields.status === 'Resolved' && !p.resolvedAt) p.resolvedAt = now();
+      if (!['Resolved', 'Closed'].includes(fields.status)) p.resolvedAt = null;
+      if (changes.length) p.history.push({ at: now(), text: 'Changed ' + changes.join('; ') });
+      toast(`Problem #${p.id} updated`);
+    } else {
+      const p = { id: state.nextId++, ...fields, createdAt: now(), updatedAt: now(),
+                  resolvedAt: null, comments: [], history: [{ at: now(), text: 'Created' }] };
+      state.problems.push(p);
+      toast(`Problem #${p.id} created`);
+    }
+    save();
+    $('#formDlg').close();
+    render();
+    if (viewingId && viewingId === editingId) openDetail(viewingId);
+  });
+
+  // ---------- Detail view ----------
+  function openDetail(id) {
+    const p = find(id); if (!p) return;
+    viewingId = id;
+    $('#dTitle').textContent = `#${p.id} ${p.title}`;
+    $('#dBody').innerHTML = `
+      <div class="meta" style="margin-top:0">
+        <span class="badge s-${p.status.replace(/ /g, "")}">${p.status}</span>
+        <span class="badge pr-${p.priority}">${p.priority}</span>
+        <span>${esc(p.category)}</span>
+        ${(p.tags || []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}
+      </div>
+      <div class="detail-desc">${p.description ? esc(p.description) : '<i>No description.</i>'}</div>
+      <div class="grid2" style="font-size:.9rem">
+        <div><b>Reported by:</b> ${esc(p.reporter) || '—'}</div>
+        <div><b>Assigned to:</b> ${esc(p.assignee) || '—'}</div>
+        <div><b>Created:</b> ${fmt(p.createdAt)}</div>
+        <div><b>Updated:</b> ${fmt(p.updatedAt)}</div>
+        <div><b>Due:</b> <span class="${isOverdue(p) ? 'overdue' : ''}">${p.dueDate || '—'}</span></div>
+        <div><b>Resolved:</b> ${fmt(p.resolvedAt) || '—'}</div>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <label for="quickStatus">Quick status change</label>
+        <select id="quickStatus">${STATUSES.map(s => `<option ${s === p.status ? 'selected' : ''}>${s}</option>`).join('')}</select>
+      </div>
+      <h4>Comments (${p.comments.length})</h4>
+      <ul class="comments">${p.comments.map(c =>
+        `<li>${esc(c.text)}<br><small>${fmt(c.at)}</small></li>`).join('') || '<li><i>No comments yet.</i></li>'}</ul>
+      <form id="commentForm">
+        <label for="commentText" class="sr-only">Add a comment</label>
+        <textarea id="commentText" placeholder="Add a comment or update…" style="min-height:60px"></textarea>
+        <div style="margin-top:6px"><button class="primary" type="submit">Add comment</button></div>
+      </form>
+      <h4>History</h4>
+      <ul class="history">${p.history.slice().reverse().map(h =>
+        `<li>${fmt(h.at)} — ${esc(h.text)}</li>`).join('')}</ul>`;
+
+    $('#quickStatus').addEventListener('change', (e) => {
+      const old = p.status; p.status = e.target.value; p.updatedAt = now();
+      if (p.status === 'Resolved' && !p.resolvedAt) p.resolvedAt = now();
+      if (!['Resolved', 'Closed'].includes(p.status)) p.resolvedAt = null;
+      p.history.push({ at: now(), text: `Changed status: "${old}" → "${p.status}"` });
+      save(); render(); openDetail(id); toast(`Status set to ${p.status}`);
+    });
+    $('#commentForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = $('#commentText').value.trim(); if (!text) return;
+      p.comments.push({ at: now(), text }); p.updatedAt = now();
+      p.history.push({ at: now(), text: 'Added a comment' });
+      save(); render(); openDetail(id);
+    });
+    if (!$('#detailDlg').open) $('#detailDlg').showModal();
+  }
+
+  $('#editBtn').addEventListener('click', () => openForm(viewingId));
+  $('#deleteBtn').addEventListener('click', () => {
+    const p = find(viewingId);
+    if (!p || !confirm(`Delete problem #${p.id} "${p.title}"? This cannot be undone.`)) return;
+    state.problems = state.problems.filter(x => x.id !== p.id);
+    save(); $('#detailDlg').close(); render(); toast(`Problem #${p.id} deleted`);
+  });
+  $('#detailDlg').addEventListener('close', () => { viewingId = null; });
+
+  // ---------- List interactions ----------
+  $('#list').addEventListener('click', (e) => {
+    const card = e.target.closest('.card'); if (card) openDetail(Number(card.dataset.id));
+  });
+  $('#list').addEventListener('keydown', (e) => {
+    const card = e.target.closest('.card');
+    if (card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openDetail(Number(card.dataset.id)); }
+  });
+  ['#search', '#fStatus', '#fPriority', '#fCategory', '#sortBy'].forEach(s =>
+    $(s).addEventListener('input', renderList));
+
+  document.querySelectorAll('[data-close]').forEach(b =>
+    b.addEventListener('click', () => b.closest('dialog').close()));
+  $('#newBtn').addEventListener('click', () => openForm());
+
+  // ---------- Export / import ----------
+  $('#exportBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `problems-${today()}.json`;
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+  $('#importBtn').addEventListener('click', () => $('#importFile').click());
+  $('#importFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0]; e.target.value = '';
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      if (!data || !Array.isArray(data.problems)) throw new Error('Missing "problems" list');
+      const valid = data.problems.every(p => Number.isInteger(p.id) && typeof p.title === 'string'
+        && STATUSES.includes(p.status) && PRIORITIES.includes(p.priority));
+      if (!valid) throw new Error('Some problems have missing or invalid fields');
+      if (!confirm(`Replace your ${state.problems.length} problem(s) with ${data.problems.length} from the file?`)) return;
+      data.problems.forEach(p => { p.comments ||= []; p.history ||= []; p.tags ||= [];
+        p.createdAt ||= now(); p.updatedAt ||= p.createdAt; p.category ||= 'Other'; });
+      state = { problems: data.problems,
+                nextId: Math.max(data.nextId || 1, ...data.problems.map(p => p.id + 1), 1) };
+      save(); render(); toast('Import complete');
+    } catch (err) { alert('Import failed: ' + err.message); }
+  });
+
+  // ---------- Theme ----------
+  function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    $('#themeBtn').textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
+  }
+  let theme = localStorage.getItem(THEME_KEY) ||
+    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  applyTheme(theme);
+  $('#themeBtn').addEventListener('click', () => {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    try { localStorage.setItem(THEME_KEY, theme); } catch {}
+    applyTheme(theme);
+  });
+
+  // ---------- Init ----------
+  fillSelect($('#fStatus'), STATUSES); fillSelect($('#fPriority'), PRIORITIES); fillSelect($('#fCategory'), CATEGORIES);
+  fillSelect($('#status'), STATUSES); fillSelect($('#priority'), PRIORITIES); fillSelect($('#category'), CATEGORIES);
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Problem Tracker</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f4f5f7;
+      color: #1f2328;
+      margin: 0;
+      padding: 2rem 1rem;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h1 { margin-top: 0; }
+
+    form, .problem {
+      background: #fff;
+      border: 1px solid #d8dee4;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      max-width: 640px;
+    }
+
+    label { font-weight: 600; }
+
+    input, textarea, select {
+      font: inherit;
+      padding: 0.5rem;
+      border: 1px solid #c9d1d9;
+      border-radius: 6px;
+    }
+
+    textarea { min-height: 80px; resize: vertical; }
+
+    button {
+      font: inherit;
+      padding: 0.6rem 1rem;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      align-self: flex-start;
+    }
+
+    button:hover { background: #1d4ed8; }
+
+    /* ---------- Toolbar: view toggle + sort ---------- */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .toolbar h2 { margin: 0; margin-right: auto; }
+
+    .view-toggle { display: flex; }
+
+    .view-toggle button {
+      background: #fff;
+      color: #1f2328;
+      border: 1px solid #c9d1d9;
+      border-radius: 0;
+      padding: 0.4rem 0.9rem;
+    }
+    .view-toggle button:first-child { border-radius: 6px 0 0 6px; }
+    .view-toggle button:last-child  { border-radius: 0 6px 6px 0; border-left: none; }
+    .view-toggle button[aria-pressed="true"] { background: #2563eb; color: #fff; border-color: #2563eb; }
+
+    .sort-control, .filter-control { display: flex; align-items: center; gap: 0.4rem; }
+    .sort-control label, .filter-control label { font-weight: 400; }
+
+    /* ---------- Status dropdown on each problem ---------- */
+    .status-row { margin-top: 0.6rem; }
+
+    .status-select {
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.3rem 0.4rem;
+    }
+    .status-select.open        { background: #fef9c3; color: #854d0e; }
+    .status-select.in-progress { background: #dbeafe; color: #1e40af; }
+    .status-select.solved      { background: #dcfce7; color: #166534; }
+
+    .note .status-select {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.25rem;
+      margin-top: 0.3rem;
+      cursor: pointer;
+    }
+
+    /* ---------- Search box ---------- */
+    .search-control {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-bottom: 1rem;
+      max-width: 640px;
+    }
+    .search-control input { width: 100%; }
+
+    /* ---------- List view ---------- */
+    #problem-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 640px;
+    }
+
+    .problem h3 { margin: 0 0 0.25rem; }
+    .problem p { margin: 0 0 0.5rem; white-space: pre-wrap; }
+    .problem time { font-size: 0.85rem; color: #57606a; }
+
+    #empty-message, #no-match-message { color: #57606a; font-style: italic; }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      margin-right: 0.5rem;
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .badge.daily   { background: #fee2e2; color: #991b1b; }
+    .badge.weekly  { background: #ffedd5; color: #9a3412; }
+    .badge.monthly { background: #dbeafe; color: #1e40af; }
+    .badge.rarely  { background: #dcfce7; color: #166534; }
+
+    /* ---------- Corkboard view ---------- */
+    #board {
+      position: relative;
+      min-height: 640px;
+      border: 12px solid #8b5a2b;          /* wooden frame */
+      border-radius: 6px;
+      overflow: hidden;
+      background-color: #c8975a;            /* cork base color */
+      background-image:                      /* speckles that read as cork */
+        radial-gradient(#a8743d 1px, transparent 1.5px),
+        radial-gradient(#dcb07a 1px, transparent 1.5px);
+      background-size: 14px 14px, 22px 22px;
+      background-position: 0 0, 7px 11px;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .note {
+      position: absolute;
+      width: 180px;
+      height: 160px;
+      padding: 1.4rem 0.75rem 0.6rem;
+      background: #fef08a;                  /* default yellow */
+      box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+      cursor: grab;
+      touch-action: none;                   /* let fingers drag instead of scroll */
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    /* the pushpin */
+    .note::before {
+      content: "";
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      margin-left: -6px;
+      border-radius: 50%;
+      background: #dc2626;
+      box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .note.daily   { background: #fca5a5; }
+    .note.weekly  { background: #fdba74; }
+    .note.monthly { background: #93c5fd; }
+    .note.rarely  { background: #86efac; }
+
+    .note.dragging {
+      cursor: grabbing;
+      transform: rotate(0deg) scale(1.05) !important;
+      box-shadow: 6px 12px 18px rgba(0, 0, 0, 0.35);
+    }
+
+    .note h3 { margin: 0 0 0.25rem; font-size: 1rem; line-height: 1.2; }
+    .note p {
+      margin: 0;
+      font-size: 0.85rem;
+      flex: 1;
+      overflow: hidden;
+      white-space: pre-wrap;
+    }
+    .note .note-meta { font-size: 0.7rem; color: rgba(0, 0, 0, 0.6); margin-top: 0.25rem; }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Problem Tracker</h1>
+
+    <form id="problem-form">
+      <label for="title">Title</label>
+      <input id="title" type="text" required placeholder="e.g. Printer jammed again">
+
+      <label for="description">Description</label>
+      <textarea id="description" placeholder="What happened? Where? Why does it matter?"></textarea>
+
+      <label for="frequency">How often does this happen?</label>
+      <select id="frequency" required>
+        <option value="" disabled selected>Choose…</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="rarely">Rarely</option>
+      </select>
+
+      <button type="submit">Add problem</button>
+    </form>
+
+    <div class="toolbar">
+      <h2>Problems</h2>
+
+      <div class="view-toggle" role="group" aria-label="View">
+        <button type="button" data-view="list">List</button>
+        <button type="button" data-view="board">Corkboard</button>
+      </div>
+
+      <div class="sort-control" id="sort-control">
+        <label for="sort">Sort:</label>
+        <select id="sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="frequency">Frequency (daily first)</option>
+          <option value="title">Title A–Z</option>
+        </select>
+      </div>
+
+      <div class="filter-control">
+        <label for="status-filter">Show:</label>
+        <select id="status-filter">
+          <option value="all">All</option>
+          <option value="open">Open</option>
+          <option value="in-progress">In progress</option>
+          <option value="solved">Solved</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="search-control">
+      <label for="search">Search by title</label>
+      <input id="search" type="search" placeholder="Type part of a title…" autocomplete="off">
+    </div>
+
+    <p id="empty-message">No problems yet. Add one above.</p>
+    <p id="no-match-message" hidden></p>
+    <ul id="problem-list"></ul>
+    <div id="board" hidden></div>
+  </main>
+
+  <script>
+    // Keys under which things are saved in localStorage.
+    const STORAGE_KEY = "problems";
+    const VIEW_KEY = "problems-view";
+    const SORT_KEY = "problems-sort";
+
+    // Post-it size and spacing (must match the .note CSS).
+    const NOTE_W = 180;
+    const NOTE_H = 160;
+    const GAP = 20;
+
+    const form = document.getElementById("problem-form");
+    const titleInput = document.getElementById("title");
+    const descriptionInput = document.getElementById("description");
+    const frequencyInput = document.getElementById("frequency");
+    const list = document.getElementById("problem-list");
+    const board = document.getElementById("board");
+    const emptyMessage = document.getElementById("empty-message");
+    const noMatchMessage = document.getElementById("no-match-message");
+    const searchInput = document.getElementById("search");
+    const sortSelect = document.getElementById("sort");
+    const sortControl = document.getElementById("sort-control");
+    const viewButtons = document.querySelectorAll(".view-toggle button");
+    const statusFilter = document.getElementById("status-filter");
+
+    // Display names for each saved status value.
+    const STATUS_LABELS = {
+      "open": "Open",
+      "in-progress": "In progress",
+      "solved": "Solved",
+    };
+
+    // Display names for each saved frequency value.
+    const FREQUENCY_LABELS = {
+      daily: "Daily",
+      weekly: "Weekly",
+      monthly: "Monthly",
+      rarely: "Rarely",
+    };
+
+    // Used to sort by frequency: smaller number = happens more often.
+    const FREQUENCY_ORDER = { daily: 0, weekly: 1, monthly: 2, rarely: 3 };
+
+    // Which view and sort are showing. Remembered between visits.
+    let currentView = readSetting(VIEW_KEY, "list");
+    let currentSort = readSetting(SORT_KEY, "newest");
+
+    // Bumped each time a note is grabbed, so it lands on top of the others.
+    let topZ = 1;
+
+    // ---------- Saving and loading ----------
+
+    function loadProblems() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveProblems(problems) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(problems));
+    }
+
+    function readSetting(key, fallback) {
+      try {
+        return localStorage.getItem(key) || fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function writeSetting(key, value) {
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        // Not critical: the setting just won't be remembered.
+      }
+    }
+
+    // ---------- Small helpers ----------
+
+    function formatCaptured(isoString) {
+      return "Captured " + new Date(isoString).toLocaleString([], {
+        weekday: "short", month: "short", day: "numeric",
+        hour: "numeric", minute: "2-digit",
+      });
+    }
+
+    function makeBadge(problem) {
+      // Older problems saved before frequency existed won't have one.
+      const badge = document.createElement("span");
+      const label = FREQUENCY_LABELS[problem.frequency];
+      badge.className = label ? "badge " + problem.frequency : "badge";
+      badge.textContent = label || "Frequency not set";
+      return badge;
+    }
+
+    // Returns a sorted COPY of the problems. The saved order is never changed.
+    function sortProblems(problems, sortBy) {
+      const sorted = [...problems];
+      const byNewest = (a, b) => b.createdAt.localeCompare(a.createdAt);
+
+      if (sortBy === "newest") {
+        sorted.sort(byNewest);
+      } else if (sortBy === "oldest") {
+        sorted.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+      } else if (sortBy === "frequency") {
+        sorted.sort((a, b) => {
+          const fa = FREQUENCY_ORDER[a.frequency] ?? 99; // "not set" goes last
+          const fb = FREQUENCY_ORDER[b.frequency] ?? 99;
+          return fa - fb || byNewest(a, b);              // tie → newest first
+        });
+      } else if (sortBy === "title") {
+        sorted.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: "base" }));
+      }
+      return sorted;
+    }
+
+    // Returns only the problems whose title contains the search text.
+    // Upper/lower case is ignored, and an empty search keeps everything.
+    function filterByTitle(problems, searchText) {
+      const wanted = searchText.trim().toLowerCase();
+      if (!wanted) return problems;
+      return problems.filter((p) => p.title.toLowerCase().includes(wanted));
+    }
+
+    // Problems saved before status existed don't have one: treat them as open.
+    function getStatus(problem) {
+      return STATUS_LABELS[problem.status] ? problem.status : "open";
+    }
+
+    // Returns only the problems with the wanted status. "all" keeps everything.
+    function filterByStatus(problems, wanted) {
+      if (wanted === "all") return problems;
+      return problems.filter((p) => getStatus(p) === wanted);
+    }
+
+    // Builds the Open / In progress / Solved dropdown for one problem.
+    function makeStatusSelect(problem) {
+      const select = document.createElement("select");
+      const current = getStatus(problem);
+      select.className = "status-select " + current;
+      select.setAttribute("aria-label", "Status of " + problem.title);
+
+      for (const value of Object.keys(STATUS_LABELS)) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = STATUS_LABELS[value];
+        select.append(option);
+      }
+      select.value = current;
+
+      // Save the new status as soon as one is chosen, then redraw.
+      select.addEventListener("change", () => {
+        const problems = loadProblems();
+        const saved = problems.find((p) => p.id === problem.id);
+        if (saved) {
+          saved.status = select.value;
+          saveProblems(problems);
+        }
+        render();
+      });
+
+      // On the corkboard, a press on the dropdown must not start dragging the note.
+      select.addEventListener("pointerdown", (event) => event.stopPropagation());
+
+      return select;
+    }
+
+    // Find the first spot in a grid that doesn't overlap a note already placed.
+    function findFreeSpot(placed, boardWidth) {
+      const cols = Math.max(1, Math.floor((boardWidth - GAP) / (NOTE_W + GAP)));
+      for (let i = 0; i < 1000; i++) {
+        const x = GAP + (i % cols) * (NOTE_W + GAP);
+        const y = GAP + Math.floor(i / cols) * (NOTE_H + GAP);
+        const overlaps = placed.some(
+          (p) => Math.abs(p.x - x) < NOTE_W && Math.abs(p.y - y) < NOTE_H
+        );
+        if (!overlaps) return { x, y };
+      }
+      return { x: GAP, y: GAP };
+    }
+
+    // ---------- List view ----------
+
+    function renderList(problems) {
+      list.innerHTML = "";
+
+      for (const problem of sortProblems(problems, currentSort)) {
+        const item = document.createElement("li");
+        item.className = "problem";
+
+        const title = document.createElement("h3");
+        title.textContent = problem.title;
+
+        const description = document.createElement("p");
+        description.textContent = problem.description;
+
+        const time = document.createElement("time");
+        time.dateTime = problem.createdAt;
+        time.textContent = formatCaptured(problem.createdAt);
+
+        const statusRow = document.createElement("div");
+        statusRow.className = "status-row";
+        statusRow.append(makeStatusSelect(problem));
+
+        item.append(title, description, makeBadge(problem), time, statusRow);
+        list.append(item);
+      }
+    }
+
+    // ---------- Corkboard view ----------
+
+    // "problems" is everything saved; "visible" is the part matching the search.
+    function renderBoard(problems, visible) {
+      board.innerHTML = "";
+      const boardWidth = board.clientWidth;
+
+      // Give any note that has never been placed a free spot on the board.
+      const placed = problems.filter((p) => typeof p.x === "number");
+      let changed = false;
+      for (const problem of problems) {
+        if (typeof problem.x !== "number") {
+          const spot = findFreeSpot(placed, boardWidth);
+          problem.x = spot.x;
+          problem.y = spot.y;
+          placed.push(problem);
+          changed = true;
+        }
+      }
+      if (changed) saveProblems(problems);
+
+      // Grow the board tall enough to show the lowest note.
+      const lowest = Math.max(0, ...problems.map((p) => p.y + NOTE_H + GAP));
+      board.style.height = Math.max(640, lowest) + "px";
+
+      for (const problem of visible) {
+        board.append(makeNote(problem, boardWidth));
+      }
+    }
+
+    function makeNote(problem, boardWidth) {
+      const note = document.createElement("div");
+      note.className = "note " + (problem.frequency || "");
+
+      // Keep the note on the board even if the window got narrower.
+      const x = Math.min(problem.x, Math.max(0, boardWidth - NOTE_W));
+      note.style.left = x + "px";
+      note.style.top = problem.y + "px";
+
+      // A slight tilt, always the same for the same note.
+      const tilt = (problem.id % 7) - 3;
+      note.style.transform = "rotate(" + tilt + "deg)";
+
+      const title = document.createElement("h3");
+      title.textContent = problem.title;
+
+      const description = document.createElement("p");
+      description.textContent = problem.description;
+
+      const meta = document.createElement("div");
+      meta.className = "note-meta";
+      const freq = FREQUENCY_LABELS[problem.frequency] || "Frequency not set";
+      meta.textContent = freq + " · " + formatCaptured(problem.createdAt);
+
+      note.append(title, description, meta, makeStatusSelect(problem));
+      enableDragging(note, problem.id);
+      return note;
+    }
+
+    function enableDragging(note, problemId) {
+      note.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        note.setPointerCapture(event.pointerId);
+        note.classList.add("dragging");
+        note.style.zIndex = ++topZ;
+
+        // Where the pointer and the note started.
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const originLeft = note.offsetLeft;
+        const originTop = note.offsetTop;
+
+        function onMove(moveEvent) {
+          const maxLeft = board.clientWidth - note.offsetWidth;
+          const maxTop = board.clientHeight - note.offsetHeight;
+          const left = originLeft + (moveEvent.clientX - startX);
+          const top = originTop + (moveEvent.clientY - startY);
+          note.style.left = Math.min(Math.max(0, left), maxLeft) + "px";
+          note.style.top = Math.min(Math.max(0, top), maxTop) + "px";
+        }
+
+        function onRelease() {
+          note.classList.remove("dragging");
+          note.removeEventListener("pointermove", onMove);
+          note.removeEventListener("pointerup", onRelease);
+          note.removeEventListener("pointercancel", onRelease);
+
+          // Save the new position only once, when the note is let go.
+          const problems = loadProblems();
+          const problem = problems.find((p) => p.id === problemId);
+          if (problem) {
+            problem.x = note.offsetLeft;
+            problem.y = note.offsetTop;
+            saveProblems(problems);
+          }
+        }
+
+        note.addEventListener("pointermove", onMove);
+        note.addEventListener("pointerup", onRelease);
+        note.addEventListener("pointercancel", onRelease);
+      });
+    }
+
+    // ---------- Drawing the page ----------
+
+    function render() {
+      const problems = loadProblems();
+      // A problem is shown only if it matches BOTH the search and the status filter.
+      // Both the list and the corkboard are drawn from this same "visible" set.
+      const visible = filterByStatus(
+        filterByTitle(problems, searchInput.value),
+        statusFilter.value
+      );
+      emptyMessage.hidden = problems.length > 0;
+
+      // Problems exist, but none match the search and status filter.
+      const noMatches = problems.length > 0 && visible.length === 0;
+      noMatchMessage.hidden = !noMatches;
+      noMatchMessage.textContent = "No problems match your search and status filter.";
+
+      const showBoard = currentView === "board";
+      list.hidden = showBoard;
+      board.hidden = !showBoard || visible.length === 0;
+      sortControl.hidden = showBoard; // sorting only applies to the list
+
+      viewButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.view === currentView));
+      });
+
+      if (showBoard) {
+        renderBoard(problems, visible);
+      } else {
+        renderList(visible);
+      }
+    }
+
+    // ---------- Events ----------
+
+    viewButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        currentView = button.dataset.view;
+        writeSetting(VIEW_KEY, currentView);
+        render();
+      });
+    });
+
+    sortSelect.value = currentSort;
+    sortSelect.addEventListener("change", () => {
+      currentSort = sortSelect.value;
+      writeSetting(SORT_KEY, currentSort);
+      render();
+    });
+
+    // Redraw on every keystroke so the results narrow as you type.
+    searchInput.addEventListener("input", render);
+
+    // Redraw whenever a different status is chosen in the "Show" filter.
+    statusFilter.addEventListener("change", render);
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault(); // stop the page from reloading
+
+      const title = titleInput.value.trim();
+      if (!title) return;
+
+      const problems = loadProblems();
+      problems.unshift({
+        id: Date.now(),
+        title: title,
+        description: descriptionInput.value.trim(),
+        frequency: frequencyInput.value,
+        status: "open",
+        createdAt: new Date().toISOString(),
+      });
+      saveProblems(problems);
+
+      form.reset();
+      titleInput.focus();
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
