@@ -7,8 +7,8 @@ changed and why when you revise it.*
 
 - **My user:** Some of my roommates.
 - **Their problem:** Constantly tracking macros and fitness is difficult, and they need a solution that makes the process more streamlined.
-- **The system:** It lets the user input activity, calories burned, and food (with a photo-to-calorie option) to make a progress chart of calorie deficit for a cut or surplus for a bulk.
-- **Working alone or in a pair:** (if a pair, your partner's name)
+- **The system:** It lets the user input activity, calories burned, and food (with a photo-to-calorie option) to make a progress chart showing a calorie deficit for a cut or a calorie surplus for a bulk.
+- **Working alone or in a pair:** Working alone.
 
 ## Where the work lives
 
