@@ -14,6 +14,9 @@ more effectively cut or bulk weight.
   plate and turn it into a lump sum of calories and nutrients.
 - **S1-AC2:** AS A CHECK, the user SHALL be able to confirm whether the system got the plate
   correct and edit any options before the meal is catalogued on their plan.
+- **S1-AC3:** WHEN the uploaded image is not a meal THE SYSTEM SHALL NOT log it as food, and SHALL
+  display a message such as "Uh oh! I can't recognize your meal! Would you like me to add it to
+  your progress photos?" with a choice to add it to progress photos or discard it.
 
 ## S2 (FR-2): Get a personalized fitness plan
 
@@ -22,17 +25,50 @@ in a way that fits my body and goals.
 
 **Acceptance criteria**
 
-- **S2-AC1:** WHEN the user requests a plan be made for their fitness journey THE SYSTEM SHALL
-  create a customized plan based on all biometrics and goals.
+- **S2-AC1:** WHEN the user enrolls in the program THE SYSTEM SHALL collect their sex, age,
+  height, weight, and desired training intensity, as part of setting their goals.
+- **S2-AC2:** WHEN the user sets a goal THE SYSTEM SHALL accept a direction (cut weight or bulk
+  weight), a target amount, and a target date.
+- **S2-AC3:** WHEN the user requests a plan be made for their fitness journey THE SYSTEM SHALL
+  create a customized plan based on all their biometrics and goals.
+- **S2-AC4:** WHEN the user changes their goal (amount or target date) or their biometrics change
+  THE SYSTEM SHALL adjust the plan accordingly.
+
+## S3 (FR-3): Track calories burned (draft, new from your answer 3)
+
+As an active person, I want my calories burned estimated for me so that my plan reflects what I
+actually do each day.
+
+**Acceptance criteria**
+
+- **S3-AC1:** WHEN the user uploads an exercise activity THE SYSTEM SHALL estimate the calories
+  burned based on the activity and the user's profile, so that the same activity can burn more
+  for a larger person.
+- **S3-AC2:** WHEN the user connects a health app THE SYSTEM SHALL synchronize total steps,
+  calories, and related data and include them in the user's daily totals.
+
+## S4 (FR-4): Keep progress photos (draft, new from your answer 4)
+
+As an active person, I want to store photos of my body over time so that I can compare and
+analyze my progress.
+
+**Acceptance criteria**
+
+- **S4-AC1:** WHEN the user adds a photo to their progress photos (from S1-AC3 or directly) THE
+  SYSTEM SHALL save it with its date.
+- **S4-AC2:** WHEN the user views their progress photos THE SYSTEM SHALL let them compare photos
+  from different dates.
+
+*Your answer said the feature lets users "compare and analyze" progress. I only wrote the saving
+and comparing parts. "Analyze" is not specified yet; see the open questions.*
 
 ## Open questions (for the student to answer)
 
-These are gaps I noticed. None are decided yet.
-
-- Which biometrics count as "all biometrics" (for example age, height, weight, sex, activity
-  level)? S2-AC1 can't be tested until this list is fixed.
-- What do the goals look like (cut, bulk, maintain, target weight, date)?
-- "Calories I am burning": does the system estimate this from the plan and biometrics, or does the
-  user enter workouts? Neither story covers it yet.
-- What happens if the photo is not a meal, or the system is unsure? (S1-AC2 covers wrong guesses
-  but not "no food found".)
+- Which health app(s) will sync (Apple Health, Google Fit, others)? This affects S3-AC2.
+- What are the training intensity levels (for example light, moderate, high)?
+- What should happen if a goal is unrealistic or unsafe (for example a large loss in a few days)?
+  S2-AC2 accepts any amount and date right now.
+- What does "analyze" mean for progress photos: just side-by-side comparison, or does the AI
+  describe changes? That decides whether S4 needs another criterion.
+- Progress photos are sensitive body images. Who can see them, and can the user delete them?
+- Are S3 and S4 part of the first version, or later? Lab 04 may only need S1 and S2.
