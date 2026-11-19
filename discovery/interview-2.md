@@ -22,7 +22,7 @@ Rungs: **said** = opinion or prediction, **did** = something they actually did, 
 - Cost: no time or money figures given.
 
 ## Evidence count
-said: 5 (bullets 1, 5, 6, 7, 8) · did: 3 (rows 2, 3, 4) · paid: 0
+said: 5 (bullets 1, 5, 6, 7, 8) · did: 3 (bullets 2, 3, 4) · paid: 0
 
 ## Gaps / follow-up questions for next time
 - Walk me through your last workout: what did you log, and when?

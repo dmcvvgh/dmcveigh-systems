@@ -22,7 +22,7 @@ Rungs: **said** = opinion or prediction, **did** = something they actually did, 
 - Cost: writing everything down takes a lot of time. No figure for minutes per day or money.
 
 ## Evidence count
-said: 3 (bullets 1, 4, 5) · did: 5 (rows 2, 3, 6, 7, 8) · paid: 0
+said: 3 (bullets 1, 4, 5) · did: 5 (bullets 2, 3, 6, 7, 8) · paid: 0
 
 ## Gaps / follow-up questions for next time
 - How many minutes a day does writing it down take, and how often did you skip days?
