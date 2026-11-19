@@ -1,25 +1,32 @@
 # AI Synthesis (Lab 3, Part C)
 
-**Items removed because no quote in my notes supported them:** ___
+**Items removed because no quote in my notes supported them:** ___ (fill in after you check each item below against practice-interview.md)
 
-<!--
-How to fill this in:
-1. Start Claude Code in this repo and paste your practice-interview notes (initials only) with this prompt:
+Source: Interview 1 (KK) in `practice-interview.md`. Your own ideas (reminders, goals, Health app integration) were excluded, since KK didn't say them.
 
-   Here are my notes from a problem interview (names removed). Do not add anything
-   that is not in the notes.
+## 1. Problems mentioned, with supporting notes, and 2. Evidence rung
 
-   1. List every distinct problem or pain mentioned, each with the exact quote that
-      supports it.
-   2. Classify each as said, did, or paid on the evidence ladder.
-   3. Write one job-to-be-done statement: When I'm ___, I want to ___, so I can ___.
-   4. List what the person does today instead (the current habit), and what it costs them.
-   5. List three questions I should have asked and did not.
+| # | Problem | Supporting note | Rung |
+|---|---|---|---|
+| 1 | Doesn't go to the gym often | "Doesn't go to the gym often." | did |
+| 2 | Gets distracted on their phone too much | "Gets distracted on their phone too much." | did |
 
-2. Paste the AI's output below.
-3. Check each item against your notes. ~~Strike out~~ anything without a supporting quote,
-   then update the count at the top.
--->
+## 3. Job-to-be-done statement
 
-## AI output (checked)
+The notes support only part of this, so the blanks are left open:
 
+When I'm **distracted on my phone**, I want to **stay locked in (using Opal)**, so I can **[not in the notes]**.
+
+No note states KK's goal for the gym or why they skip it, so I did not write a statement about the gym.
+
+## 4. What the person does today, and what it costs
+
+- Uses the Opal app to stop getting distracted and stay locked in.
+- Uses the Health app on their phone.
+- Cost: **not in the notes** (no time, money, or frequency was recorded).
+
+## 5. Three questions I should have asked and did not
+
+1. Walk me through the last time you meant to go to the gym and didn't. What happened?
+2. How often do you go to the gym now, and how much time do you spend on your phone each day?
+3. What does Opal cost you, and what have you tried that did not work?
