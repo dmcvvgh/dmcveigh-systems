@@ -6,25 +6,23 @@
 **Format and length:** Spoken interview, transcribed from voice notes
 
 ## Notes
-Tags: **said** = opinion or prediction, **did** = something they actually did, **paid** = spent money, time, or reputation.
+Rungs: **said** = opinion or prediction, **did** = something they actually did, **paid** = spent money, time, or reputation.
 
-| # | Note / quote | Rung |
-|---|---|---|
-| 1 | Hardest part of the fitness journey: "staying consistent on my diet and really just tracking all my macros for the day while also balancing school, my exciting lifestyle, and everything else I have going on." | said |
-| 2 | Tried counting calories, protein, fats, and carbs every day "just on my phone, on my notes app." | did |
-| 3 | It stopped working: "it just got hard keeping track because it just took a lot of time to really write everything down." | did |
-| 4 | Wish: "it would just be so much easier if there was a way that I could just have all of it done instantly." | said |
-| 5 | Wants to know "what I'm eating, when I'm eating it, and what's going into my body." | said |
-| 6 | Most important tool now is the notes app: "that's where I keep my carbs, my macros, my protein, my fats, all the calories that I'm eating and everything I'm consuming in a day. I just write it all down there." | did |
-| 7 | Second most important tool is the photo app: takes "photos and videos of myself to really just compare" and "to keep me encouraged to keep going and not stop." | did |
-| 8 | "I like to go back and compare old photos of myself to the new ones to see how far I've come." | did |
+- Hardest part is staying consistent with diet and tracking all macros while balancing school and a busy life. **(said)**
+- Tried counting calories, protein, fats, and carbs every day in the phone notes app. **(did)**
+- It stopped working because writing everything down took too much time. **(did)**
+- Wishes all of it could be done instantly. **(said)**
+- Wants to know what they're eating, when, and what's going into their body. **(said)**
+- Notes app is the most important tool: it holds all their carbs, macros, protein, fats, and calories for the day. **(did)**
+- Photo app is the second most important tool: takes photos and videos of themselves to stay encouraged. **(did)**
+- Goes back and compares old photos with new ones to see how far they've come. **(did)**
 
 ## What they do today, and what it costs
 - Today: types calories and macros (carbs, protein, fats) into the phone notes app each day; takes progress photos and videos in the photo app and compares old and new.
-- Cost, in their words: "it took a lot of time to really write everything down." No figure for minutes per day or money.
+- Cost: writing everything down takes a lot of time. No figure for minutes per day or money.
 
 ## Evidence count
-said: 3 (rows 1, 4, 5) · did: 5 (rows 2, 3, 6, 7, 8) · paid: 0
+said: 3 (bullets 1, 4, 5) · did: 5 (rows 2, 3, 6, 7, 8) · paid: 0
 
 ## Gaps / follow-up questions for next time
 - How many minutes a day does writing it down take, and how often did you skip days?
