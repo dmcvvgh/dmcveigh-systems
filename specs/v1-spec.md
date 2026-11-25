@@ -34,18 +34,18 @@ the user and can be deleted (Later-AC4, Later-AC5).
   instead of a single daily target.
 
 Screens in v1:
-1. **Sign in** (Supabase).
-2. **Set up** biometrics, goal, and heavy lifting days (S3-AC1 to S3-AC3, S3-AC8).
-3. **Today (home)**: week budget, eaten, burned, left this week, chart, timeline of today's meals,
+1. **Set up** biometrics, goal, and heavy lifting days (S3-AC1 to S3-AC3, S3-AC8).
+2. **Today (home)**: week budget, eaten, burned, left this week, chart, timeline of today's meals,
    "+ Photo" and "By hand" buttons.
-4. **Add meal from photo**: upload, estimate, confirm or edit, Cancel.
-5. **Add meal by hand**: name, calories, protein, fats, carbs, time eaten.
-6. **Log workout**: exercise, weight lifted, calories burned.
+3. **Add meal from photo**: upload, estimate, confirm or edit, Cancel.
+4. **Add meal by hand**: name, calories, protein, fats, carbs, time eaten.
+5. **Log workout**: exercise, weight lifted, calories burned.
 
 ## Data
 
-Stored in a Supabase database. Each row belongs to one signed-in user and is visible only to them
-(row-level security). Field names and types are for the build plan to settle.
+**v1: stored in the browser** (local storage on the user's device). The Supabase database with
+sign-in and per-user access rules (row-level security) comes in Lab 6; the fields below are the
+same either way. Field names and types are for the build plan to settle.
 
 | Thing | Fields |
 |---|---|
@@ -63,7 +63,10 @@ numbers are calculated, not stored.
 ## Decisions already made
 
 - **Stack:** Next.js (TypeScript) with Tailwind, deployed to Vercel.
-- **Database and sign-in: Supabase.** Chosen over device-only storage because data kept only on a
+- **Database and sign-in: Supabase, but moved to Lab 6 (changed Nov 25).** The course says v1 can
+  live in the browser and a real database comes in Lab 6, so v1 stores data in the browser. The
+  reasoning below still holds for the later move.
+  Original reasoning: Chosen over device-only storage because data kept only on a
   phone is lost if the user clears it or changes phones. This is a compromise: data is no longer
   only on the user's device (NFR-5 was rewritten, see `discovery/requirements.md`). Privacy comes
   from sign-in plus per-user access rules, and the user can delete their data. We may look at

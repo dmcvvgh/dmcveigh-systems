@@ -5,23 +5,25 @@ criteria named for that task, run `npm test`, tick the box, and commit. Criteria
 [user-stories.md](user-stories.md). The plan these came from is approved; the design is in
 [v1-spec.md](v1-spec.md).
 
+> Trimmed on Nov 25 to fit Lab 4: data is stored in the browser (the database and sign-in are
+> Lab 6), and the food estimate is a clearly labeled stand-in unless a Gemini key is added.
+
 - [x] **Task 0: Set up.** Next.js + Tailwind + Vitest in `app/`, a hello page, one passing test.
-- [ ] **Task 1: Supabase and sign-in.** Create the project, write `architecture/schema.sql` and
-  `policies.sql`, add email sign-in and sign-out. (NFR-1, NFR-2, NFR-5)
-- [ ] **Task 2: Budget rules with tests.** Weekly budget, heavy and rest days, even split with no
-  heavy days, unsafe-goal check. (S3-AC7, AC8, AC9, AC10 rules)
-- [ ] **Task 3: Set-up screen.** Biometrics with confirmation and missing-item errors, goal, heavy
-  days. (S3-AC1, AC2, AC3, AC8)
-- [ ] **Task 4: Unsafe-goal pop-up and recompute.** (S3-AC10, AC5)
-- [ ] **Task 5: Add meal by hand.** Validation, Cancel, daily totals. (S1-AC4, AC8, AC9, AC10)
-- [ ] **Task 6: Today screen (Mockup C).** Budget, eaten, burned, left this week, timeline, empty
+- [ ] **Task 1: Budget rules with tests.** Weekly budget, heavy and rest days, even split with no
+  heavy days, unsafe-goal check and safer-goal suggestion. (S3-AC7, AC8, AC9, AC10 rules)
+- [ ] **Task 2: Browser storage and set-up screen.** Biometrics with confirmation and
+  missing-item errors, goal, heavy days, unsafe-goal pop-up, recompute on change.
+  (S3-AC1, AC2, AC3, AC5, AC8, AC10)
+- [ ] **Task 3: Add meal by hand.** Validation, Cancel, daily totals. (S1-AC4, AC8, AC9, AC10)
+- [ ] **Task 4: Today screen (Mockup C).** Budget, eaten, burned, left this week, timeline, empty
   state, chart. (S1-AC5, S3-AC6, AC8)
-- [ ] **Task 7: Log a workout.** Calories burned entered by hand. (S2-AC1)
-- [ ] **Task 8: Photo upload and Gemini route.** File checks, `estimateMeal()` server function.
-  (S1-AC1, AC6)
-- [ ] **Task 9: Confirm, edit, not-food, and failure screens.** (S1-AC2, AC3, AC7, AC8, AC4,
-  Later-AC4, AC5)
-- [ ] **Task 10: Polish and deploy.** Phone check, timing (NFR-3), Vercel, URL in README.
+- [ ] **Task 5: Log a workout.** Calories burned entered by hand. (S2-AC1)
+- [ ] **Task 6: Photo flow with a stand-in estimate.** Upload with file checks, confirm and edit,
+  not-food screen with save or discard, failure screen with try again or enter by hand.
+  (S1-AC1 partly, AC2, AC3, AC6, AC7, AC8, Later-AC4, AC5)
+- [ ] **Task 7: Real photo recognition (Gemini).** Server route behind `estimateMeal()`; needs your
+  free key in `app/.env.local`. (S1-AC1)
+- [ ] **Task 8: Polish and deploy.** Phone check, timing (NFR-3), Vercel, URL in README.
   (NFR-3, NFR-4)
 
 ## Acceptance check

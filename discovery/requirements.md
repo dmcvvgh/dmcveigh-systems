@@ -92,3 +92,6 @@ Draft: users will keep logging only if entering food takes much less effort than
   edits or hand entry). NFR-2 now covers progress photos and says the user can delete them. Meal
   photos are not saved, only the numbers, so nothing but the user's own progress photos is stored
   as an image.
+- **Nov 25 (later):** for Lab 4, v1 stores data in the browser, as the course allows. The Supabase
+  database (the NFR-5 change above) moves to Lab 6. Until then NFR-5 is met in its original form:
+  data stays on the user's own device.
