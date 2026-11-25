@@ -2,10 +2,12 @@
 // Today (home) screen, after Mockup C: where you are today and this week. S1-AC5, S3-AC6, S3-AC8.
 import Link from "next/link";
 import WeekChart from "@/components/WeekChart";
-import { mealsOn } from "@/lib/meals";
+import { dayKey, mealsOn } from "@/lib/meals";
 import { summarizeWeek } from "@/lib/week";
 import { useMeals } from "@/lib/useMeals";
 import { useProfile } from "@/lib/useProfile";
+import { useWorkouts } from "@/lib/useWorkouts";
+import { burnedByDate } from "@/lib/workouts";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const button = "inline-flex min-h-12 flex-1 items-center justify-center rounded-full px-4 text-base font-semibold";
@@ -17,6 +19,7 @@ function fmt(n: number) {
 export default function Today() {
   const { loaded, profile } = useProfile();
   const { meals } = useMeals();
+  const { workouts } = useWorkouts();
   if (!loaded) return <p className="p-4 text-sm text-gray-600">Loading...</p>;
 
   if (!profile) {
@@ -30,7 +33,8 @@ export default function Today() {
   }
 
   const today = new Date();
-  const week = summarizeWeek(profile, meals, {}, today);
+  const week = summarizeWeek(profile, meals, burnedByDate(workouts), today);
+  const todaysWorkouts = workouts.filter((w) => w.date === dayKey(today));
   const todays = mealsOn(meals, today);
   const goal = profile.goal;
   const over = week.leftWeek < 0;
@@ -82,10 +86,25 @@ export default function Today() {
         </ol>
       )}
 
+      {todaysWorkouts.length > 0 && (
+        <>
+          <h2 className="mt-4 text-base font-semibold">Workouts today</h2>
+          <ul className="mt-1 border-l-2 border-orange-200 pl-3">
+            {todaysWorkouts.map((w) => (
+              <li key={w.id} className="mb-2 text-sm">
+                {w.exercise}{w.weightLb > 0 ? `, ${fmt(w.weightLb)} lb` : ""}
+                <small className="block text-gray-600">about {fmt(w.caloriesBurned)} kcal burned</small>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+
       <div className="mt-4 flex gap-2">
         <Link href="/add-meal" className={`${button} bg-green-100 text-gray-900`}>By hand</Link>
         <span aria-disabled="true" className={`${button} bg-gray-200 text-gray-500`}>+ Photo (soon)</span>
       </div>
+      <Link href="/log-workout" className={`${button} mt-2 w-full bg-orange-100 text-gray-900`}>Log a workout</Link>
       <p className="mt-4 text-center text-sm">
         <Link href="/setup" className="text-green-800 underline">Change my goal</Link>
       </p>

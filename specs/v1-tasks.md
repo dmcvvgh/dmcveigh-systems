@@ -17,7 +17,7 @@ criteria named for that task, run `npm test`, tick the box, and commit. Criteria
 - [x] **Task 3: Add meal by hand.** Validation, Cancel, daily totals. (S1-AC4, AC8, AC9, AC10)
 - [x] **Task 4: Today screen (Mockup C).** Budget, eaten, burned, left this week, timeline, empty
   state, chart. (S1-AC5, S3-AC6, AC8)
-- [ ] **Task 5: Log a workout.** Calories burned entered by hand. (S2-AC1)
+- [x] **Task 5: Log a workout.** Calories burned entered by hand. (S2-AC1)
 - [ ] **Task 6: Photo flow with a stand-in estimate.** Upload with file checks, confirm and edit,
   not-food screen with save or discard, failure screen with try again or enter by hand.
   (S1-AC1 partly, AC2, AC3, AC6, AC7, AC8, Later-AC4, AC5)
