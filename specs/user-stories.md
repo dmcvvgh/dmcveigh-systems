@@ -71,7 +71,8 @@ As an active person, I want a plan made for my fitness journey so that I can cut
 in a way that fits my body and goals.
 
 - **S3-AC1:** WHEN the user enrolls in the program THE SYSTEM SHALL collect their sex, age,
-  height, weight, and desired training intensity, as part of setting their goals.
+  height, weight, and desired training intensity (light, moderate, or high), as part of setting
+  their goals.
 - **S3-AC2 (going wrong):** IF any required biometric (sex, age, height, weight, or training
   intensity) is missing THE SYSTEM SHALL NOT create the plan, and SHALL show which items are
   missing. WHEN all biometrics are entered THE SYSTEM SHALL show them back to the user to confirm
@@ -87,17 +88,23 @@ in a way that fits my body and goals.
   budget.
 - **S3-AC7 (new):** WHEN the user sets a goal THE SYSTEM SHALL turn it into a weekly calorie
   budget (a rough rule of thumb is about 3,500 calories per pound), rather than a fixed daily
-  target.
+  target. The budget SHALL depend on the user's biometrics and training intensity, so a smaller,
+  lighter person gets a different budget from a larger, heavier one.
 - **S3-AC8 (new):** WHEN the user picks their heavy lifting days and their rest days THE SYSTEM
   SHALL give heavy lifting days a larger share, and rest days a smaller share, of the week's
   calories, and show how many calories are left this week.
+- **S3-AC10 (going wrong, new):** IF the goal would mean losing weight unsafely fast (placeholder
+  rule: more than 2 lb a week, or a daily budget under 1,200 calories) THE SYSTEM SHALL show a
+  pop-up suggesting a smaller goal to start with, and let the user work up to the larger goal
+  later. The system SHALL NOT encourage starving. The pop-up SHALL NOT silently change the goal.
 - **S3-AC9 (going wrong, new):** IF the user has not picked any heavy lifting days THE SYSTEM
   SHALL split the weekly budget evenly across the days and tell the user it did so.
 
 ## Later (not in v1)
 
-Progress photos (cites FR-8, Could). Kept here so the idea is not lost, but it is outside the MVP
-scope in `requirements.md`.
+Progress photos and progress numbers (cites FR-8, Could). Kept here so the idea is not lost, but
+outside the MVP scope in `requirements.md`. Later-AC4 and Later-AC5 also apply in v1 to the simple
+photo save from S1-AC3.
 
 - **Later-AC1:** WHEN the user adds a photo to their progress photos (from S1-AC3 or directly)
   THE SYSTEM SHALL save it with its date.
@@ -106,12 +113,27 @@ scope in `requirements.md`.
 - **Later-AC3 (going wrong):** IF the user has fewer than two progress photos THE SYSTEM SHALL
   NOT require a comparison, and SHALL show a message that a second photo is needed to compare.
   Progress photos SHALL be optional.
+- **Later-AC4 (privacy, new):** THE SYSTEM SHALL show a progress photo only to the user who saved
+  it.
+- **Later-AC5 (new):** WHEN the user deletes a progress photo THE SYSTEM SHALL remove it
+  permanently.
+- **Later-AC6 (new):** WHEN the user enters a progress number (for example their weight) with a
+  date THE SYSTEM SHALL save it, so a user who does not want to use photos can still track
+  progress.
+- **Later-AC7 (going wrong, new):** IF a progress number is empty or not a number THE SYSTEM SHALL
+  NOT save it and SHALL show "Enter a number, like 165".
 
 ## Open questions
 
-- Which health app(s) will sync (Apple Health, Google Fit, others)? Affects S2-AC3.
-- What are the training intensity levels (for example light, moderate, high)?
-- What happens if a goal is unrealistic or unsafe (a large loss in a few days)? S3-AC3 accepts
-  any amount and date right now.
-- Who can see progress photos, and can the user delete them (NFR-1, NFR-2)?
+- Is the unsafe-goal rule in S3-AC10 right (2 lb a week, 1,200 calories a day)? These numbers are
+  placeholders chosen by Claude.
+- Which health app(s) will sync (Apple Health, Google Fit)? Only matters after v1.
 - "Analyze" progress photos: only side-by-side comparison, or should the AI describe changes?
+- Are progress numbers (Later-AC6) wanted in v1 or later?
+
+## Decided
+
+- Calorie rule of thumb (about 3,500 per pound) and the weekly budget are fine for the demo.
+- Training intensity levels are light, moderate, and high.
+- Meal photos are not saved, only the numbers.
+- Progress photos are visible only to the user and can be deleted.

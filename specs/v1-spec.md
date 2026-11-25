@@ -1,7 +1,7 @@
 # Fitness and Calorie Tracker (working name) v1, spec
 
-> DRAFT for the student to check. Items marked **[confirm]** are Claude's guesses, not your
-> decisions.
+> DRAFT for the student to check. The student confirmed Claude's earlier guesses on Nov 25. Only
+> items still marked **[confirm]** are open.
 
 ## Intent
 
@@ -18,11 +18,12 @@ All criteria live in [specs/user-stories.md](user-stories.md). v1 builds these:
 | Story | In v1 | Not in v1 |
 |---|---|---|
 | S1 Log a meal from a photo | S1-AC1 to S1-AC10 | none |
-| S2 Log a workout and calories burned | S2-AC1 (log a workout); calories burned **entered by hand [confirm]** | S2-AC2 (estimating burn from an uploaded activity), S2-AC3 and S2-AC4 (health app sync and its fallback) |
-| S3 Plan and progress | S3-AC1, S3-AC2, S3-AC3, S3-AC5, S3-AC6, S3-AC7, S3-AC8, S3-AC9 | S3-AC4 as a full custom plan: in v1 the "plan" is the weekly budget with heavy and rest days **[confirm]** |
+| S2 Log a workout and calories burned | S2-AC1 (log a workout); calories burned entered by hand | S2-AC2 (estimating burn from an uploaded activity), S2-AC3 and S2-AC4 (health app sync and its fallback) |
+| S3 Plan and progress | S3-AC1, S3-AC2, S3-AC3, S3-AC5, S3-AC6, S3-AC7, S3-AC8, S3-AC9, S3-AC10 | S3-AC4 as a full custom plan: in v1 the "plan" is the weekly budget with heavy and rest days |
 
-Progress photos (the "Later" section) are not built, except the simple "save with its date" that
-S1-AC3 offers for a photo that is not a meal.
+Progress photos and progress numbers (the "Later" section) are not built, except the simple "save
+with its date" that S1-AC3 offers for a photo that is not a meal. That saved photo is private to
+the user and can be deleted (Later-AC4, Later-AC5).
 
 ## Screens and flow
 
@@ -44,7 +45,7 @@ Screens in v1:
 ## Data
 
 Stored in a Supabase database. Each row belongs to one signed-in user and is visible only to them
-(row-level security). **[confirm]** field names and types.
+(row-level security). Field names and types are for the build plan to settle.
 
 | Thing | Fields |
 |---|---|
@@ -53,9 +54,10 @@ Stored in a Supabase database. Each row belongs to one signed-in user and is vis
 | training_day | user, weekday, kind (heavy or rest) |
 | meal | user, name, calories, protein, fats, carbs, eaten_at, source (photo or hand) |
 | workout | user, date, exercise, weight lifted, calories burned (entered by hand) |
-| progress_photo | user, image, saved date (only from S1-AC3) |
+| progress_photo | user, image, saved date (only from S1-AC3 in v1; the user can delete it) |
+| progress_entry (Later) | user, date, value such as weight |
 
-Meal photos are sent to the AI for analysis and are **not stored** **[confirm]**. Weekly budget
+Meal photos are sent to the AI for analysis and are **not stored**. Only the numbers are saved. Weekly budget
 numbers are calculated, not stored.
 
 ## Decisions already made
@@ -71,12 +73,23 @@ numbers are calculated, not stored.
   The built-in "try again or enter by hand" path (S1-AC7) covers failures and quota limits.
 - **Weekly budget, not a daily target.** The user sets a goal, picks heavy lifting days, and the
   system divides a weekly calorie budget across the week, giving heavy days more. Rough rule of
-  thumb: about 3,500 calories per pound **[confirm]**. The calories-per-day base uses a standard
-  formula (Mifflin-St Jeor) from sex, age, height, and weight **[confirm]**.
+  thumb: about 3,500 calories per pound. The daily base comes from a standard formula
+  (Mifflin-St Jeor) from sex, age, height, and weight, scaled by training intensity: light,
+  moderate, or high. A smaller, lighter person therefore gets a lower budget than a larger,
+  heavier one at the same intensity.
 - **Home screen: Mockup C**, because it shows where you are today and does not assume you are
   eating when you open it.
 - **Calories burned are entered by hand in v1** (no health-app sync).
 - **Cancel** is available at every step before Confirm (S1-AC8).
+- **Unsafe goals:** the system shows a pop-up suggesting a smaller goal to start with and working
+  up, and does not encourage starving (S3-AC10). Placeholder rule: more than 2 lb a week, or a
+  daily budget under 1,200 calories **[confirm]**.
+- **Meal photos are not saved**, only the numbers.
+- **Progress photos** are visible only to the user and can be deleted. Progress numbers (for
+  example weight) are an option for users who do not want photos, and are planned for later.
+- **Logging speed (NFR-3):** about 7 seconds when the estimate is accepted as is (aim for less),
+  and about 20 to 30 seconds with corrections or hand entry. The usability test should time this.
+- **Gemini free-key limits and terms:** not checked. Accepted as fine for a demo.
 
 ## Considered and rejected
 
@@ -104,12 +117,9 @@ numbers are calculated, not stored.
 
 ## Open questions
 
-- Are the numbers above (3,500 calories per pound, Mifflin-St Jeor) acceptable for a demo?
-- What are the training intensity levels (for example light, moderate, high), and how do they
-  change the budget?
-- What should happen with an unrealistic or unsafe goal? S3-AC3 accepts any amount and date.
-- What are the current free limits and data-use terms for the Gemini free key? To be read before
-  building, and the answer written into NFR-1.
-- Should the app save a meal photo, or only the numbers? (Proposed: only the numbers.)
-- What is the target for NFR-3: logging a meal in under how many seconds?
-- Who can see saved progress photos, and can they delete them?
+- Is the unsafe-goal rule (2 lb a week, 1,200 calories a day) right? These numbers are Claude's
+  placeholders.
+- Are progress numbers wanted in v1 or later? (Currently later.)
+- What are the current free limits and data-use terms for the Gemini free key? Skipped for the
+  demo. If the demo goes beyond a class project, read them and update NFR-1.
+- Which health apps would sync later?

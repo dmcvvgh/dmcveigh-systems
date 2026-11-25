@@ -66,8 +66,8 @@ journey
 | ID | Category | Requirement | Source |
 |---|---|---|---|
 | NFR-1 | Privacy | A user's data shall not be shared with other users or third parties without their consent. | Interview 2 |
-| NFR-2 | Privacy | Body measurements such as body fat shall be visible only to the user who entered them. | Interview 2 |
-| NFR-3 | Usability | Logging a meal shall take noticeably less effort than typing it into a notes app; [decide] set a target, e.g. under N seconds. | Interview 1 |
+| NFR-2 | Privacy | Body measurements such as body fat, and progress photos, shall be visible only to the user who entered them, and the user shall be able to delete them. | Interview 2 (progress photos added Nov 25) |
+| NFR-3 | Usability | Logging a meal shall take noticeably less effort than typing it into a notes app. Target: about 7 seconds when the system's estimate is accepted without changes (aim to be quicker), and about 20 to 30 seconds when the user corrects numbers or adds things by hand. | Interview 1 (target set Nov 25) |
 | NFR-4 | Usability | The system shall be usable on a phone. (Interview 1 tracks "on my phone".) | Interview 1 |
 | NFR-5 | Privacy | A user's data shall be stored in their own private account, visible only to them, and the user shall be able to delete all of their data at any time. | Interview 3 (revised Nov 25, see change note) |
 
@@ -88,3 +88,7 @@ Draft: users will keep logging only if entering food takes much less effort than
   and per-user access rules, and the user can delete their data. We may look at other storage
   later. Also: FR-1 in the app uses a photo to fill in the macros (the user can still edit or
   enter them by hand).
+- **Nov 25:** NFR-3 now has a target time (about 7 seconds with no edits, 20 to 30 seconds with
+  edits or hand entry). NFR-2 now covers progress photos and says the user can delete them. Meal
+  photos are not saved, only the numbers, so nothing but the user's own progress photos is stored
+  as an image.
