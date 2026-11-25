@@ -117,8 +117,8 @@ numbers are calculated, not stored.
 
 ## Open questions
 
-- How will Apple Health data reach the app later? A website cannot read it directly, so it would
-  need a native iPhone app or an imported export file. Not needed for v1.
+- Apple Health (future, not v1): the data would come from a native iPhone app. In v1 the user
+  enters calories burned by hand.
 - The Gemini free-key limits and data terms were not checked. Accepted for the demo. If the app
   goes beyond a class project, read them and update NFR-1.
 - Progress numbers (weight updates) are later, not v1.

@@ -126,8 +126,8 @@ photo save from S1-AC3.
 ## Open questions
 
 - "Analyze" progress photos: only side-by-side comparison, or should the AI describe changes?
-- Apple Health has no web interface a website can read directly. Before S2-AC3 is built, choose:
-  a native iPhone app, or importing an export file. Not needed for v1.
+- Apple Health (future, not v1): data would come from a native iPhone app. In v1 the user enters
+  calories burned by hand.
 
 ## Decided
 
