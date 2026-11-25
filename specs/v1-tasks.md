@@ -14,7 +14,7 @@ criteria named for that task, run `npm test`, tick the box, and commit. Criteria
 - [x] **Task 2: Browser storage and set-up screen.** Biometrics with confirmation and
   missing-item errors, goal, heavy days, unsafe-goal pop-up, recompute on change.
   (S3-AC1, AC2, AC3, AC5, AC8, AC10)
-- [ ] **Task 3: Add meal by hand.** Validation, Cancel, daily totals. (S1-AC4, AC8, AC9, AC10)
+- [x] **Task 3: Add meal by hand.** Validation, Cancel, daily totals. (S1-AC4, AC8, AC9, AC10)
 - [ ] **Task 4: Today screen (Mockup C).** Budget, eaten, burned, left this week, timeline, empty
   state, chart. (S1-AC5, S3-AC6, AC8)
 - [ ] **Task 5: Log a workout.** Calories burned entered by hand. (S2-AC1)
