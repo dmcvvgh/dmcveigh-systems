@@ -1,9 +1,25 @@
 # User stories
 
+IDs in brackets, like FR-1, are requirement IDs from `discovery/requirements.md` (Lab 3).
+
+| Story | Cites | Requirement text (from Lab 3) | Priority in Lab 3 |
+|---|---|---|---|
+| S1 | FR-1 | log a food entry with calories, protein, fats, and carbs | Must |
+| S1 | FR-3 | show daily totals of calories and each macro | Must |
+| S2 | FR-7 | support a cut or bulk goal using food tracking | Should |
+| S3 | FR-4 | log a workout (exercise and weight lifted) | Must |
+| S3 | FR-11 | pull calories burned from the Apple Health app and Apple Watch | Could |
+| S4 | FR-8 | store and compare progress photos over time | Could |
+
+Privacy requirements NFR-1, NFR-2 and NFR-5 apply to S4 (body photos) and to S2 (body data).
+
+**Not yet covered by a story:** FR-2 (record the time of each food entry) and the weight-lifted
+part of FR-4.
+
 Each story has acceptance criteria written as "WHEN ... THE SYSTEM SHALL ...". A feature is done
 when every criterion for its story passes in the running app.
 
-## S1 (FR-1): Log a meal from a photo
+## S1 (FR-1, FR-3): Log a meal from a photo
 
 As an active person, I want to track all the calories I am burning and consuming so that I can
 more effectively cut or bulk weight.
@@ -18,7 +34,7 @@ more effectively cut or bulk weight.
   display a message such as "Uh oh! I can't recognize your meal! Would you like me to add it to
   your progress photos?" with a choice to add it to progress photos or discard it.
 
-## S2 (FR-2): Get a personalized fitness plan
+## S2 (FR-7): Get a personalized fitness plan
 
 As an active person, I want a plan made for my fitness journey so that I can cut or bulk weight
 in a way that fits my body and goals.
@@ -38,7 +54,7 @@ in a way that fits my body and goals.
 - **S2-AC4:** WHEN the user changes their goal (amount or target date) or their biometrics change
   THE SYSTEM SHALL adjust the plan accordingly.
 
-## S3 (FR-3): Track calories burned (draft, new from your answer 3)
+## S3 (FR-4, FR-11): Track calories burned (draft)
 
 As an active person, I want my calories burned estimated for me so that my plan reflects what I
 actually do each day.
@@ -54,7 +70,7 @@ actually do each day.
   did not work and let them enter or upload their activity manually, so their daily totals are
   still complete.
 
-## S4 (FR-4): Keep progress photos (draft, new from your answer 4)
+## S4 (FR-8): Keep progress photos (draft)
 
 As an active person, I want to store photos of my body over time so that I can compare and
 analyze my progress.
