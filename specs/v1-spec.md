@@ -1,7 +1,7 @@
 # Fitness and Calorie Tracker (working name) v1, spec
 
-> DRAFT for the student to check. The student confirmed Claude's earlier guesses on Nov 25. Only
-> items still marked **[confirm]** are open.
+> DRAFT for the student to check. The student confirmed all of Claude's earlier guesses on
+> Nov 25.
 
 ## Intent
 
@@ -82,8 +82,8 @@ numbers are calculated, not stored.
 - **Calories burned are entered by hand in v1** (no health-app sync).
 - **Cancel** is available at every step before Confirm (S1-AC8).
 - **Unsafe goals:** the system shows a pop-up suggesting a smaller goal to start with and working
-  up, and does not encourage starving (S3-AC10). Placeholder rule: more than 2 lb a week, or a
-  daily budget under 1,200 calories **[confirm]**.
+  up, and does not encourage starving (S3-AC10). Rule: more than 2 lb a week, or a daily budget
+  under 1,200 calories (the floor).
 - **Meal photos are not saved**, only the numbers.
 - **Progress photos** are visible only to the user and can be deleted. Progress numbers (for
   example weight) are an option for users who do not want photos, and are planned for later.
@@ -107,7 +107,7 @@ numbers are calculated, not stored.
 
 ## Out of scope for v1
 
-- Health app sync (Apple Health, Google Fit) and the Apple Watch (FR-11).
+- Apple Health sync and the Apple Watch (FR-11).
 - Estimating calories burned from an uploaded activity (S2-AC2).
 - A full AI-written fitness plan (S3-AC4 beyond the weekly budget).
 - Comparing progress photos (the "Later" section).
@@ -117,9 +117,8 @@ numbers are calculated, not stored.
 
 ## Open questions
 
-- Is the unsafe-goal rule (2 lb a week, 1,200 calories a day) right? These numbers are Claude's
-  placeholders.
-- Are progress numbers wanted in v1 or later? (Currently later.)
-- What are the current free limits and data-use terms for the Gemini free key? Skipped for the
-  demo. If the demo goes beyond a class project, read them and update NFR-1.
-- Which health apps would sync later?
+- How will Apple Health data reach the app later? A website cannot read it directly, so it would
+  need a native iPhone app or an imported export file. Not needed for v1.
+- The Gemini free-key limits and data terms were not checked. Accepted for the demo. If the app
+  goes beyond a class project, read them and update NFR-1.
+- Progress numbers (weight updates) are later, not v1.

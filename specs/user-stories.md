@@ -59,7 +59,7 @@ I actually do each day.
 - **S2-AC2:** WHEN the user uploads an exercise activity THE SYSTEM SHALL estimate the calories
   burned based on the activity and the user's profile, so that the same activity can burn more
   for a larger person.
-- **S2-AC3:** WHEN the user connects a health app THE SYSTEM SHALL synchronize total steps,
+- **S2-AC3 (not in v1; health app is Apple Health):** WHEN the user connects Apple Health THE SYSTEM SHALL synchronize total steps,
   calories, and related data and include them in the user's daily totals.
 - **S2-AC4 (going wrong):** IF the health app sync fails THE SYSTEM SHALL tell the user the sync
   did not work and let them enter or upload their activity manually, so their daily totals are
@@ -93,8 +93,8 @@ in a way that fits my body and goals.
 - **S3-AC8 (new):** WHEN the user picks their heavy lifting days and their rest days THE SYSTEM
   SHALL give heavy lifting days a larger share, and rest days a smaller share, of the week's
   calories, and show how many calories are left this week.
-- **S3-AC10 (going wrong, new):** IF the goal would mean losing weight unsafely fast (placeholder
-  rule: more than 2 lb a week, or a daily budget under 1,200 calories) THE SYSTEM SHALL show a
+- **S3-AC10 (going wrong, new):** IF the goal would mean losing weight unsafely fast (more than 2 lb
+  a week, or a daily budget under 1,200 calories, which is the floor) THE SYSTEM SHALL show a
   pop-up suggesting a smaller goal to start with, and let the user work up to the larger goal
   later. The system SHALL NOT encourage starving. The pop-up SHALL NOT silently change the goal.
 - **S3-AC9 (going wrong, new):** IF the user has not picked any heavy lifting days THE SYSTEM
@@ -125,11 +125,9 @@ photo save from S1-AC3.
 
 ## Open questions
 
-- Is the unsafe-goal rule in S3-AC10 right (2 lb a week, 1,200 calories a day)? These numbers are
-  placeholders chosen by Claude.
-- Which health app(s) will sync (Apple Health, Google Fit)? Only matters after v1.
 - "Analyze" progress photos: only side-by-side comparison, or should the AI describe changes?
-- Are progress numbers (Later-AC6) wanted in v1 or later?
+- Apple Health has no web interface a website can read directly. Before S2-AC3 is built, choose:
+  a native iPhone app, or importing an export file. Not needed for v1.
 
 ## Decided
 
@@ -137,3 +135,6 @@ photo save from S1-AC3.
 - Training intensity levels are light, moderate, and high.
 - Meal photos are not saved, only the numbers.
 - Progress photos are visible only to the user and can be deleted.
+- Unsafe goal rule: more than 2 lb a week, or a daily budget under 1,200 calories (the floor).
+- Progress numbers are later, not v1.
+- Health app is Apple Health. The Gemini free-key limits are not checked for the demo.
