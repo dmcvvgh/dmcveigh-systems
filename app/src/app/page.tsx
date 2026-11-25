@@ -102,11 +102,11 @@ export default function Today() {
 
       <div className="mt-4 flex gap-2">
         <Link href="/add-meal" className={`${button} bg-green-100 text-gray-900`}>By hand</Link>
-        <span aria-disabled="true" className={`${button} bg-gray-200 text-gray-500`}>+ Photo (soon)</span>
+        <Link href="/add-photo" className={`${button} bg-green-700 text-white`}>+ Photo</Link>
       </div>
       <Link href="/log-workout" className={`${button} mt-2 w-full bg-orange-100 text-gray-900`}>Log a workout</Link>
       <p className="mt-4 text-center text-sm">
-        <Link href="/setup" className="text-green-800 underline">Change my goal</Link>
+        <Link href="/setup" className="text-green-800 underline">Change my goal</Link> &middot; <Link href="/progress-photos" className="text-green-800 underline">Progress photos</Link>
       </p>
     </main>
   );

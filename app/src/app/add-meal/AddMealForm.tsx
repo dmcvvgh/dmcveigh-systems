@@ -3,17 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
-import { validateMeal } from "@/lib/meals";
+import { nowForInput, validateMeal } from "@/lib/meals";
 import { addMeal } from "@/lib/useMeals";
 
 const field = "mt-1 w-full rounded-lg border border-gray-300 px-3 py-3 text-base";
-
-/** Now, as text for a date-and-time box, in the user's own time zone. */
-function nowForInput(): string {
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-}
 
 export default function AddMealForm() {
   const router = useRouter();

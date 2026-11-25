@@ -31,7 +31,7 @@ flowchart TD
     S8[Error: Could not read this photo. Try again or enter the meal by hand]
     S9{Food on the plate?}
     S10[Uh oh! I can't recognize your meal! Add it to progress photos?]
-    S11[Save photo with today's date]
+    S11[Save photo with today's date, show it on the Progress photos page]
     S12[Discard photo, nothing logged]
     S13[Show estimate: each food, total calories and macros]
     S14[Recalculate totals]

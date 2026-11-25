@@ -115,3 +115,10 @@ export function parseMeals(raw: string | null): Meal[] {
     return [];
   }
 }
+
+/** Now, as text for a date-and-time box, in the user's own time zone. Call only in the browser. */
+export function nowForInput(): string {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 16);
+}
