@@ -27,7 +27,8 @@ effectively cut or bulk weight.
   correct and edit any options before the meal is catalogued on their plan.
 - **S1-AC3 (going wrong):** WHEN the uploaded image is not a meal THE SYSTEM SHALL NOT log it as
   food, and SHALL display a message such as "Uh oh! I can't recognize your meal! Would you like
-  me to add it to your progress photos?" with a choice to add it to progress photos or discard it.
+  me to add it to your progress photos?" with a choice to save it to progress photos (a simple
+  save with the date, no comparing in v1) or discard it.
 - **S1-AC4 (new):** WHEN the user confirms a meal THE SYSTEM SHALL record the time it was eaten and
   update the day's totals of calories and each macro (protein, fats, carbs).
 
@@ -83,8 +84,6 @@ scope in `requirements.md`.
 
 ## Open questions
 
-- **Decide for v1:** S1-AC3 offers "add to progress photos", but progress photos are "Later".
-  Keep a minimal save-with-date in v1, or drop that choice from S1-AC3?
 - Which health app(s) will sync (Apple Health, Google Fit, others)? Affects S2-AC3.
 - What are the training intensity levels (for example light, moderate, high)?
 - What happens if a goal is unrealistic or unsafe (a large loss in a few days)? S3-AC3 accepts
