@@ -71,7 +71,10 @@ numbers are calculated, not stored.
   only on the user's device (NFR-5 was rewritten, see `discovery/requirements.md`). Privacy comes
   from sign-in plus per-user access rules, and the user can delete their data. We may look at
   other storage later.
-- **Photo to calories: Google Gemini free API key.** It is called only from server code. The key
+- **Photo to calories: v1 uses a labeled sample estimate (changed Nov 25).** Real recognition was
+  skipped because Lab 4 does not require it. The Gemini plan below still holds for later; the
+  screens already call one function (`estimateMeal`) that the Gemini code would replace.
+  Original decision: Google Gemini free API key. It is called only from server code. The key
   is in `app/.env.local` and in Vercel's environment settings, never in the browser or on GitHub.
   The built-in "try again or enter by hand" path (S1-AC7) covers failures and quota limits.
 - **Weekly budget, not a daily target.** The user sets a goal, picks heavy lifting days, and the
