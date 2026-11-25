@@ -40,6 +40,14 @@ effectively cut or bulk weight.
   SHALL tell the user it could not read the photo and let them try again or enter the meal by hand
   (food name, calories, protein, fats, carbs). A meal entered by hand SHALL be saved the same way
   as one from a photo (S1-AC4).
+- **S1-AC8 (new):** WHEN the user taps Cancel at any step before confirming (choosing a photo,
+  reading the estimate, or entering a meal by hand) THE SYSTEM SHALL return to the Today screen and
+  log nothing.
+- **S1-AC9 (new):** WHEN the user taps "Add meal by hand" at any time, with or without a photo, THE
+  SYSTEM SHALL let them enter the food name, calories, protein, fats, carbs, and the time it was
+  eaten (defaulting to now), so a meal eaten earlier can be logged later.
+- **S1-AC10 (going wrong, new):** IF the calories are empty or not a number when saving a meal by
+  hand THE SYSTEM SHALL NOT save it and SHALL show "Enter calories as a number, like 450".
 
 ## S2 (FR-4, FR-11): Log a workout and calories burned
 

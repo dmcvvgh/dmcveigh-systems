@@ -10,11 +10,14 @@ flowchart TD
   subgraph User
     U1[Open the app, Today screen]
     U2[Tap Add meal, choose a photo]
+    U2b[Tap Add meal by hand]
     U3[Look at the estimate]
     U4[Edit items or amounts]
     U5[Tap Confirm]
     U6{Save as progress photo?}
     U7[Choose a different photo]
+    U8[Fill in food, calories, macros, time eaten]
+    UC[Tap Cancel]
   end
 
   subgraph System
@@ -35,15 +38,24 @@ flowchart TD
     S15[Save meal with time eaten]
     S16[Update daily totals]
     S17[Today screen shows the new meal]
+    S18{Calories a number?}
+    S19[Error: Enter calories as a number, like 450]
+    S20[Nothing logged, back to Today screen]
   end
 
   U1 --> S1
-  S1 -- No --> S2 --> U2
-  S1 -- Yes --> S3 --> U2
+  S1 -- No --> S2
+  S1 -- Yes --> S3
+  S2 --> U2
+  S2 --> U2b
+  S3 --> U2
+  S3 --> U2b
   U2 --> S4
   S4 -- No --> S5 --> U7 --> S4
   S4 -- Yes --> S6 --> S7
-  S7 -- No --> S8 --> U2
+  S7 -- No --> S8
+  S8 --> U2
+  S8 --> U2b
   S7 -- Yes --> S9
   S9 -- No --> S10 --> U6
   U6 -- Yes --> S11 --> S1
@@ -51,7 +63,15 @@ flowchart TD
   S9 -- Yes --> S13 --> U3
   U3 -- Correct --> U5
   U3 -- Wrong --> U4 --> S14 --> U3
-  U5 --> S15 --> S16 --> S17
+  U5 --> S15
+  U2b --> U8 --> S18
+  S18 -- No --> S19 --> U8
+  S18 -- Yes --> S15
+  S15 --> S16 --> S17
+  U3 -.-> UC
+  U8 -.-> UC
+  U2 -.-> UC
+  UC --> S20 --> S1
 ```
 
 ## Which story criterion each part satisfies
@@ -65,12 +85,20 @@ flowchart TD
 | Empty state: invite first photo | S1-AC5 |
 | Invalid or oversized file | S1-AC6 |
 | Estimate failed: try again or enter by hand | S1-AC7 |
+| Cancel before confirming, nothing logged (dotted lines) | S1-AC8 |
+| Add meal by hand at any time, choose the time eaten | S1-AC9 |
+| Calories missing or not a number | S1-AC10 |
+
+## Decided
+
+- "Enter the meal by hand" is both a fallback when the estimate fails and a button you can use
+  any time (for example to log something you ate earlier).
+- Cancel is available at every step before Confirm and returns to the Today screen with nothing
+  logged.
+- After discarding a non-meal photo, the user returns to the Today screen.
 
 ## Still to decide
 
-- **Cancel path.** Can the user back out partway (for example after choosing a photo, or while
-  looking at the estimate) and return to the Today screen with nothing logged? The flow has no
-  cancel path yet.
-
-Decided: keep "enter the meal by hand" as the fallback when the estimate fails. After discarding
-a non-meal photo, the user returns to the Today screen.
+- **"Offline."** I read your idea as: you ate something and did not log it, then add it later.
+  S1-AC9 covers that by letting you set the time eaten. True offline use (no internet, then
+  syncing later) is a bigger feature and is NOT in v1. Is the first reading what you meant?
