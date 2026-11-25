@@ -96,9 +96,5 @@ flowchart TD
 - Cancel is available at every step before Confirm and returns to the Today screen with nothing
   logged.
 - After discarding a non-meal photo, the user returns to the Today screen.
-
-## Still to decide
-
-- **"Offline."** I read your idea as: you ate something and did not log it, then add it later.
-  S1-AC9 covers that by letting you set the time eaten. True offline use (no internet, then
-  syncing later) is a bigger feature and is NOT in v1. Is the first reading what you meant?
+- "Offline" means manual: if you ate something and forgot to log it with a photo, you can still
+  enter the calories by hand later (S1-AC9). Working with no internet connection is not in v1.
