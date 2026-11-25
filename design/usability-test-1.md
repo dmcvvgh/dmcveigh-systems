@@ -1,24 +1,28 @@
 # Usability test 1
 
 Written from the student's account of the test on Nov 25. Anything they did not say is marked
-**Not noted** so it is not guessed. The student can fill those in.
+**Not noted** so it is not guessed.
 
 ## Setup
 
 - **Who:** one of the student's roommates, who had not seen the app. (No name recorded.)
 - **Device:** the student's own phone, which is small.
-- **Task given:** **Not noted.**
+- **Task given:** enter a meal and your fitness goals.
 - **Instructions given:** none beyond showing the app.
 
 ## What happened
 
-- **Did they finish?** They were able to use the app as intended without any real instruction.
-  **Not noted:** which task or tasks they completed, and how long logging a meal took (the
-  NFR-3 check was not timed).
-- **Where they hesitated:** **Not noted.** The student's impression was that it was pretty
-  intuitive, because the buttons are clearly labeled.
-- **What they said:** **Not noted.**
+- **Did they finish?** They were able to use the app as intended without any real instruction,
+  and completed the task: entering a meal and setting fitness goals.
+- **Where they hesitated:**
+  1. When entering the number of days they stay active (the heavy lifting days part of set-up).
+  2. On the home page, where it was hard to see some of the information.
+- **What they said:** their first thought on logging a meal was that it is a lot of things to plug
+  in at one time. The student thinks that may be hard to streamline without the photo API
+  integration (real photo recognition, which was skipped for Lab 4).
 - **What they clicked that did nothing:** **Not noted.**
+- **How fast was logging a meal?** Pretty fast, in the student's words. **Not timed**, so there is
+  no number for NFR-3 (about 7 seconds with no edits, 20 to 30 seconds with edits).
 
 ## What the student saw
 
@@ -30,6 +34,12 @@ Written from the student's account of the test on Nov 25. Anything they did not 
    realigning so they are all in order.
 3. **Look:** the student thinks more could be done to make the app more visually appealing.
 4. **What worked:** the root purpose of the app is all there, and the student likes the graph.
+
+**Possible links between what they saw and what the roommate did** (Claude's reading, not
+confirmed): the hard-to-see home page information may have been the dark-mode text problem. The
+hesitation on "days staying active" may be partly the misaligned buttons, and partly the label:
+the set-up asks you to pick which days are "Heavy lifting days", not a number of days, so the
+wording may not match how the roommate thought about it.
 
 ## Top two changes
 
