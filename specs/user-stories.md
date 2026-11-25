@@ -31,6 +31,10 @@ in a way that fits my body and goals.
   weight), a target amount, and a target date.
 - **S2-AC3:** WHEN the user requests a plan be made for their fitness journey THE SYSTEM SHALL
   create a customized plan based on all their biometrics and goals.
+- **S2-AC5 (going wrong):** IF any required biometric (sex, age, height, weight, or training
+  intensity) is missing THE SYSTEM SHALL NOT create the plan, and SHALL show which items are
+  missing. WHEN all biometrics are entered THE SYSTEM SHALL show them back to the user to confirm
+  before the goal is set.
 - **S2-AC4:** WHEN the user changes their goal (amount or target date) or their biometrics change
   THE SYSTEM SHALL adjust the plan accordingly.
 
@@ -46,6 +50,9 @@ actually do each day.
   for a larger person.
 - **S3-AC2:** WHEN the user connects a health app THE SYSTEM SHALL synchronize total steps,
   calories, and related data and include them in the user's daily totals.
+- **S3-AC3 (going wrong):** IF the health app sync fails THE SYSTEM SHALL tell the user the sync
+  did not work and let them enter or upload their activity manually, so their daily totals are
+  still complete.
 
 ## S4 (FR-4): Keep progress photos (draft, new from your answer 4)
 
@@ -58,6 +65,9 @@ analyze my progress.
   SYSTEM SHALL save it with its date.
 - **S4-AC2:** WHEN the user views their progress photos THE SYSTEM SHALL let them compare photos
   from different dates.
+- **S4-AC3 (going wrong):** IF the user has fewer than two progress photos THE SYSTEM SHALL NOT
+  require a comparison, and SHALL show a message that a second photo is needed to compare.
+  Progress photos SHALL be optional; the user can use the rest of the system without adding any.
 
 *Your answer said the feature lets users "compare and analyze" progress. I only wrote the saving
 and comparing parts. "Analyze" is not specified yet; see the open questions.*
