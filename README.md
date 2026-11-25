@@ -5,10 +5,10 @@
 *Fill this in during Lab 3 and keep it current. Sprint reviews are read against it. Note what
 changed and why when you revise it.*
 
-- **My user:** who the system is for (a role and an organization, no personal names)
-- **Their problem:** what goes wrong today, in one or two sentences
-- **The system:** what it does for them, in one sentence
-- **Working alone or in a pair:** (if a pair, your partner's name)
+- **My user:** Some of my roommates.
+- **Their problem:** Constantly tracking macros and fitness is difficult, and they need a solution that makes the process more streamlined.
+- **The system:** It lets the user input activity, calories burned, and food (with a photo-to-calorie option) to make a progress chart showing a calorie deficit for a cut or a calorie surplus for a bulk.
+- **Working alone or in a pair:** Working alone.
 
 ## Where the work lives
 

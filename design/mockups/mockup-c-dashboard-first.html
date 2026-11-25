@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mockup C: Dashboard first</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f1ea;font-family:system-ui,sans-serif;color:#26302a}
+.phone{max-width:375px;margin:16px auto;background:#fff;border-radius:20px;padding:16px;box-shadow:0 4px 20px #0002;position:relative}
+h1{font-size:18px;margin:0}.goal{font-size:13px;color:#5a6b5f;margin:2px 0 12px}
+.cards{display:flex;gap:8px}.card{flex:1;background:#f3f7f2;border-radius:12px;padding:10px;text-align:center}
+.card b{display:block;font-size:20px}.card span{font-size:12px;color:#5a6b5f}
+.deficit{background:#e3f3e6}
+svg{width:100%;height:110px;margin:12px 0 4px}
+.legend{font-size:12px;color:#5a6b5f;display:flex;gap:12px}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px}
+.tl{margin:12px 0 70px;border-left:2px solid #d6e2d6;padding-left:12px}
+.tl div{margin:0 0 10px;font-size:14px}.tl small{color:#5a6b5f;display:block}
+.fab{position:absolute;right:16px;bottom:16px;display:flex;gap:8px}
+button{min-height:44px;border:0;border-radius:22px;padding:0 16px;font-size:15px;font-weight:600}
+.p{background:#2e8b57;color:#fff}.s{background:#dfe9df;color:#26302a}
+.note{max-width:375px;margin:0 auto 24px;padding:0 16px;font-size:14px}
+</style></head><body>
+<div class="phone">
+<h1>Your cut: 165 &rarr; 160 lb by Dec 15</h1><div class="goal">Daily target: about 2,000 kcal eaten</div>
+<div class="cards"><div class="card"><b>1,260</b><span>eaten</span></div><div class="card"><b>2,410</b><span>burned so far</span></div><div class="card deficit"><b>-1,150</b><span>deficit</span></div></div>
+<svg viewBox="0 0 300 110" role="img" aria-label="Eaten versus burned over the last 7 days"><rect width="300" height="110" fill="#f9fbf8"/>
+<polyline fill="none" stroke="#e08e45" stroke-width="3" points="10,40 55,45 100,38 145,50 190,42 235,48 285,44"/>
+<polyline fill="none" stroke="#2e8b57" stroke-width="3" points="10,70 55,62 100,75 145,60 190,72 235,66 285,78"/></svg>
+<div class="legend"><span><i style="background:#e08e45"></i>Burned</span><span><i style="background:#2e8b57"></i>Eaten</span><span>Last 7 days</span></div>
+<div class="tl"><div>12:40 pm &middot; Chicken rice bowl<small>610 kcal</small></div><div>8:15 am &middot; Greek yogurt and berries<small>320 kcal</small></div><div>7:30 am &middot; Protein bar (by hand)<small>330 kcal</small></div><div>6:45 am &middot; Weights, 52 min<small>about 380 kcal burned</small></div></div>
+<div class="fab"><button class="s">By hand</button><button class="p">+ Photo</button></div>
+</div>
+<p class="note"><b>Assumes:</b> the user cares most about whether they are on track for their cut or bulk, and logging is a means to that. <b>Assumes</b> seeing the deficit and the trend each time motivates more than a list of meals does.</p>
+</body></html>
