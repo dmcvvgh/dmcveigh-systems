@@ -11,7 +11,7 @@ criteria named for that task, run `npm test`, tick the box, and commit. Criteria
 - [x] **Task 0: Set up.** Next.js + Tailwind + Vitest in `app/`, a hello page, one passing test.
 - [x] **Task 1: Budget rules with tests.** Weekly budget, heavy and rest days, even split with no
   heavy days, unsafe-goal check and safer-goal suggestion. (S3-AC7, AC8, AC9, AC10 rules)
-- [ ] **Task 2: Browser storage and set-up screen.** Biometrics with confirmation and
+- [x] **Task 2: Browser storage and set-up screen.** Biometrics with confirmation and
   missing-item errors, goal, heavy days, unsafe-goal pop-up, recompute on change.
   (S3-AC1, AC2, AC3, AC5, AC8, AC10)
 - [ ] **Task 3: Add meal by hand.** Validation, Cancel, daily totals. (S1-AC4, AC8, AC9, AC10)

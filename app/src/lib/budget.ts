@@ -82,7 +82,7 @@ export function checkGoalSafety(b: Biometrics, g: Goal): SafetyCheck {
   const lbPerWeek = g.amountLb / g.weeks;
   const dailyAverage = weeklyBudget(b, g) / 7;
   if (lbPerWeek > MAX_LOSS_LB_PER_WEEK) reasons.push(`That is ${lbPerWeek.toFixed(1)} lb a week; more than ${MAX_LOSS_LB_PER_WEEK} lb a week is too fast.`);
-  if (dailyAverage < DAILY_FLOOR) reasons.push(`That works out to under ${DAILY_FLOOR} calories a day.`);
+  if (dailyAverage < DAILY_FLOOR) reasons.push(`That works out to under ${DAILY_FLOOR.toLocaleString("en-US")} calories a day.`);
   if (reasons.length === 0) return { unsafe: false, reasons };
 
   // Largest weekly loss that respects both limits.

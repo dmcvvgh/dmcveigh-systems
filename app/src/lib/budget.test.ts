@@ -62,7 +62,7 @@ describe("S3-AC10: unsafe goals", () => {
   it("flags a daily budget under 1,200 calories", () => {
     const result = checkGoalSafety(smaller, { direction: "cut", amountLb: 8, weeks: 4 });
     expect(result.unsafe).toBe(true);
-    expect(result.reasons.join(" ")).toMatch(/1200/);
+    expect(result.reasons.join(" ")).toMatch(/1,200/);
   });
   it("accepts a gentle cut", () => {
     expect(checkGoalSafety(person, { direction: "cut", amountLb: 5, weeks: 10 }).unsafe).toBe(false);
