@@ -1,7 +1,6 @@
 # Flow: Log a meal from a photo (S1)
 
 > DRAFT for the student to check. Covers S1-AC1 to S1-AC4 (see `specs/user-stories.md`).
-> Boxes marked **(new)** are not in a story yet; keep them or cut them.
 
 The flow has two lanes: the **User** and the **System** (which includes the AI that reads the
 photo). Every decision has an answer for both branches, including errors and empty states.
@@ -26,7 +25,7 @@ flowchart TD
     S5[Error: Use a JPG or PNG under 10 MB]
     S6[Read the photo, estimate foods, calories, macros]
     S7{Estimate worked?}
-    S8[Error: Could not read this photo. Try again or enter the meal by hand - new]
+    S8[Error: Could not read this photo. Try again or enter the meal by hand]
     S9{Food on the plate?}
     S10[Uh oh! I can't recognize your meal! Add it to progress photos?]
     S11[Save photo with today's date]
@@ -63,15 +62,15 @@ flowchart TD
 | Look at the estimate, edit, then Confirm | S1-AC2 |
 | Not a meal: "Uh oh!" message, save as progress photo or discard | S1-AC3 |
 | Save meal with time, update daily totals | S1-AC4 |
-| Empty state, invalid file, estimate failed | Not in a story yet (see below) |
+| Empty state: invite first photo | S1-AC5 |
+| Invalid or oversized file | S1-AC6 |
+| Estimate failed: try again or enter by hand | S1-AC7 |
 
-## Questions to check
+## Still to decide
 
-1. The empty state, the invalid-file error, and the "estimate failed, enter by hand" box are not
-   in any story. Do you want criteria for them? The lab asks for error and empty states in the
-   flow, so I would add them to S1.
-2. "Enter the meal by hand" matches your Lab 3 requirement FR-1 (typing in calories and macros).
-   Keep it as the fallback, or leave it out of v1?
-3. After "Discard", the user lands on the Today screen. Is that what you would expect?
-4. Is the user ever able to cancel in the middle, for example after choosing a photo but before
-   Confirm? The flow has no cancel path yet.
+- **Cancel path.** Can the user back out partway (for example after choosing a photo, or while
+  looking at the estimate) and return to the Today screen with nothing logged? The flow has no
+  cancel path yet.
+
+Decided: keep "enter the meal by hand" as the fallback when the estimate fails. After discarding
+a non-meal photo, the user returns to the Today screen.

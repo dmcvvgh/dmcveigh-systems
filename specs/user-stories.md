@@ -31,6 +31,15 @@ effectively cut or bulk weight.
   save with the date, no comparing in v1) or discard it.
 - **S1-AC4 (new):** WHEN the user confirms a meal THE SYSTEM SHALL record the time it was eaten and
   update the day's totals of calories and each macro (protein, fats, carbs).
+- **S1-AC5 (going wrong, new):** WHEN the user has no meals logged today THE SYSTEM SHALL show an
+  empty state that invites them to upload a photo of their first meal.
+- **S1-AC6 (going wrong, new):** IF the uploaded file is not a supported image or is too large THE
+  SYSTEM SHALL NOT process it, and SHALL show "Use a JPG or PNG under 10 MB" so the user can choose
+  a different photo. (The 10 MB limit is a placeholder; change it if you want.)
+- **S1-AC7 (going wrong, new):** IF the system cannot estimate the meal from the photo THE SYSTEM
+  SHALL tell the user it could not read the photo and let them try again or enter the meal by hand
+  (food name, calories, protein, fats, carbs). A meal entered by hand SHALL be saved the same way
+  as one from a photo (S1-AC4).
 
 ## S2 (FR-4, FR-11): Log a workout and calories burned
 
