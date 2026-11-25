@@ -42,11 +42,11 @@ real world, recognition rather than recall.)*
 
 ## What this choice means for the build
 
-- The home screen needs the goal and a calories-burned figure, which come from S3 (the plan and
-  chart, S3-AC6) and S2 (calories burned). In the earlier proposal I had left those for later.
-  Choosing C pulls a simple version of them into v1. Decide how simple: for example, a fixed
-  daily target typed in by the user, and a burned figure typed in by hand, with no health sync
-  yet.
+- The home screen needs a weekly budget and a calories-burned figure. These come from S3 (goal,
+  weekly budget, heavy and rest days) and S2 (calories burned). Decided: the user types in the
+  goal and picks heavy lifting days, the system does the arithmetic, and calories burned are
+  entered by hand in v1 (no health sync). The home screen should show "left this week" rather
+  than only a single daily target, so the C mockup's "Daily target" line will change.
 - S1 (logging a meal) is still the story the build starts with, since it feeds the "eaten" number.
 
 ## What the three mockups do not cover yet

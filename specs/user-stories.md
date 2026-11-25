@@ -83,8 +83,16 @@ in a way that fits my body and goals.
 - **S3-AC5:** WHEN the user changes their goal (amount or target date) or their biometrics change
   THE SYSTEM SHALL adjust the plan accordingly.
 - **S3-AC6 (new, from your sprint plan):** WHEN the user views their progress THE SYSTEM SHALL
-  show a chart of calories eaten against calories burned, as a deficit for a cut or a surplus
-  for a bulk.
+  show a chart of calories eaten against calories burned for the week, against their weekly
+  budget.
+- **S3-AC7 (new):** WHEN the user sets a goal THE SYSTEM SHALL turn it into a weekly calorie
+  budget (a rough rule of thumb is about 3,500 calories per pound), rather than a fixed daily
+  target.
+- **S3-AC8 (new):** WHEN the user picks their heavy lifting days and their rest days THE SYSTEM
+  SHALL give heavy lifting days a larger share, and rest days a smaller share, of the week's
+  calories, and show how many calories are left this week.
+- **S3-AC9 (going wrong, new):** IF the user has not picked any heavy lifting days THE SYSTEM
+  SHALL split the weekly budget evenly across the days and tell the user it did so.
 
 ## Later (not in v1)
 

@@ -69,7 +69,7 @@ journey
 | NFR-2 | Privacy | Body measurements such as body fat shall be visible only to the user who entered them. | Interview 2 |
 | NFR-3 | Usability | Logging a meal shall take noticeably less effort than typing it into a notes app; [decide] set a target, e.g. under N seconds. | Interview 1 |
 | NFR-4 | Usability | The system shall be usable on a phone. (Interview 1 tracks "on my phone".) | Interview 1 |
-| NFR-5 | Privacy | A user's profile shall be private, and the user shall be able to keep their data stored on their own phone rather than on a server. | Interview 3 |
+| NFR-5 | Privacy | A user's data shall be stored in their own private account, visible only to them, and the user shall be able to delete all of their data at any time. | Interview 3 (revised Nov 25, see change note) |
 
 ## Riskiest assumption
 Draft: users will keep logging only if entering food takes much less effort than the notes app, and the system can offer that without the user doing the macro math. If false, the app is just another notes app. Interview 3 adds a second risk: people whose Apple Watch and Apple Health setup already works may see no reason to switch, so the app has to be aimed at people just getting into fitness. Test: [decide] time one day of notes-app logging with the interviewee, then have them try a paper or clickable mock-up of the faster flow and compare.
@@ -79,3 +79,12 @@ Draft: users will keep logging only if entering food takes much less effort than
 **Out:**
 - FR-5 to FR-7 and FR-12 (Should): useful, but not needed to test the riskiest assumption. FR-12 (reminders) is not yet backed by user evidence.
 - FR-8 to FR-11 (Could): photo comparison, rankings, body fat, and Apple Health integration are nice-to-haves nobody asked for first.
+
+## Changes
+- **Nov 25:** NFR-5 changed. It said the user could keep data on their own phone rather than on a
+  server. v1 now stores data in a Supabase database behind sign-in, because data kept only on a
+  device is lost if the user clears it or changes phones. This is a compromise: the data is no
+  longer only on the user's device, so the privacy promise is weaker. It is protected by sign-in
+  and per-user access rules, and the user can delete their data. We may look at other storage
+  later. Also: FR-1 in the app uses a photo to fill in the macros (the user can still edit or
+  enter them by hand).
