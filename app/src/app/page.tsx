@@ -1,15 +1,20 @@
 "use client";
-// Temporary home page for Task 2: shows the saved plan. Task 4 replaces it with the Today screen.
+// Today (home) screen, after Mockup C: where you are today and this week. S1-AC5, S3-AC6, S3-AC8.
 import Link from "next/link";
-import { maintenanceCalories, splitWeek, weeklyBudget } from "@/lib/budget";
-import { dayTotals, mealsOn } from "@/lib/meals";
-import { weeksUntil } from "@/lib/profile";
+import WeekChart from "@/components/WeekChart";
+import { mealsOn } from "@/lib/meals";
+import { summarizeWeek } from "@/lib/week";
 import { useMeals } from "@/lib/useMeals";
 import { useProfile } from "@/lib/useProfile";
 
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const button = "inline-flex min-h-12 flex-1 items-center justify-center rounded-full px-4 text-base font-semibold";
 
-export default function Home() {
+function fmt(n: number) {
+  return Math.round(n).toLocaleString("en-US");
+}
+
+export default function Today() {
   const { loaded, profile } = useProfile();
   const { meals } = useMeals();
   if (!loaded) return <p className="p-4 text-sm text-gray-600">Loading...</p>;
@@ -19,67 +24,71 @@ export default function Home() {
       <main className="mx-auto max-w-sm p-4">
         <h1 className="text-xl font-semibold">Fitness and Calorie Tracker</h1>
         <p className="mt-2 text-sm text-gray-600">Set your goal to get a weekly calorie budget.</p>
-        <Link href="/setup" className="mt-4 inline-flex min-h-12 items-center rounded-xl bg-green-700 px-4 font-semibold text-white">
-          Set up my plan
-        </Link>
+        <Link href="/setup" className={`${button} mt-4 bg-green-700 text-white`}>Set up my plan</Link>
       </main>
     );
   }
 
-  const weeks = weeksUntil(profile.goal.targetDate, new Date());
-  const budget = weeklyBudget(profile.biometrics, { ...profile.goal, weeks: Math.max(weeks, 1) });
-  const plan = splitWeek(budget, profile.heavyDays);
   const today = new Date();
+  const week = summarizeWeek(profile, meals, {}, today);
   const todays = mealsOn(meals, today);
-  const totals = dayTotals(meals, today);
+  const goal = profile.goal;
+  const over = week.leftWeek < 0;
+  const isHeavy = profile.heavyDays.includes(week.todayIndex);
 
   return (
-    <main className="mx-auto max-w-sm p-4">
-      <h1 className="text-xl font-semibold">Your plan</h1>
+    <main className="mx-auto max-w-sm p-4 pb-8">
+      <h1 className="text-lg font-bold">
+        Your {goal.direction}: {goal.amountLb} lb by {goal.targetDate}
+      </h1>
       <p className="text-sm text-gray-600">
-        {profile.goal.direction === "cut" ? "Cut" : "Bulk"} {profile.goal.amountLb} lb by {profile.goal.targetDate}
+        {DAY_NAMES[week.todayIndex]}: about {fmt(week.todayBudget)} calories
+        {week.splitEvenly ? " (split evenly)" : isHeavy ? " (heavy lifting day)" : " (rest day)"}
       </p>
-      <p className="mt-3 text-2xl font-bold">{budget.toLocaleString()} <span className="text-sm font-normal text-gray-600">calories a week</span></p>
-      <p className="text-xs text-gray-600">About {maintenanceCalories(profile.biometrics).toLocaleString()} a day to stay the same weight.</p>
-      {plan.splitEvenly && (
-        <p className="mt-2 rounded-lg bg-yellow-50 p-2 text-xs text-yellow-900">No heavy lifting days picked, so calories are split evenly.</p>
-      )}
-      <ul className="mt-3 divide-y rounded-lg border">
-        {plan.perDay.map((cal, d) => (
-          <li key={d} className="flex justify-between px-3 py-2 text-sm">
-            <span>{DAYS[d]} {profile.heavyDays.includes(d) && <span className="text-xs text-green-700">heavy</span>}</span>
-            <span className="font-medium">{cal.toLocaleString()}</span>
-          </li>
-        ))}
-      </ul>
-      <h2 className="mt-6 text-lg font-semibold">Today&apos;s meals</h2>
-      {todays.length === 0 ? (
-        <p className="text-sm text-gray-600">Nothing logged yet today.</p>
-      ) : (
-        <>
-          <p className="text-sm text-gray-700">
-            {totals.calories.toLocaleString()} cal &middot; protein {totals.protein} g &middot; fats {totals.fats} g &middot; carbs {totals.carbs} g
-          </p>
-          <ul className="mt-2 divide-y rounded-lg border">
-            {todays.map((m) => (
-              <li key={m.id} className="flex justify-between px-3 py-2 text-sm">
-                <span>
-                  {new Date(m.eatenAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} &middot; {m.name}
-                </span>
-                <span className="font-medium">{m.calories.toLocaleString()}</span>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-      <div className="mt-4 flex gap-2">
-        <Link href="/add-meal" className="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-green-700 px-4 font-semibold text-white">
-          Add meal by hand
-        </Link>
-        <Link href="/setup" className="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-gray-200 px-4 font-semibold">
-          Change my goal
-        </Link>
+
+      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+        <div className="rounded-xl bg-green-50 p-2">
+          <b className="block text-xl">{fmt(week.eatenToday)}</b>
+          <span className="text-xs text-gray-600">eaten today</span>
+        </div>
+        <div className="rounded-xl bg-green-50 p-2">
+          <b className="block text-xl">{fmt(week.burnedToday)}</b>
+          <span className="text-xs text-gray-600">burned today</span>
+        </div>
+        <div className={`rounded-xl p-2 ${over ? "bg-red-50" : "bg-emerald-100"}`}>
+          <b className="block text-xl">{fmt(Math.abs(week.leftWeek))}</b>
+          <span className="text-xs text-gray-600">{over ? "over this week" : "left this week"}</span>
+        </div>
       </div>
+
+      <WeekChart eaten={week.eatenByDay} burned={week.burnedByDay} todayIndex={week.todayIndex} />
+
+      <h2 className="mt-4 text-base font-semibold">Today</h2>
+      {todays.length === 0 ? (
+        <div className="mt-1 rounded-xl bg-gray-50 p-4 text-sm text-gray-700">
+          <p className="font-medium">No meals logged yet today.</p>
+          <p className="mt-1">Upload a photo of your first meal, or add it by hand.</p>
+        </div>
+      ) : (
+        <ol className="mt-1 border-l-2 border-green-200 pl-3">
+          {todays.map((m) => (
+            <li key={m.id} className="mb-2 text-sm">
+              {new Date(m.eatenAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} &middot; {m.name}
+              <small className="block text-gray-600">
+                {fmt(m.calories)} kcal{m.source === "hand" ? " (by hand)" : ""}
+              </small>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      <div className="mt-4 flex gap-2">
+        <Link href="/add-meal" className={`${button} bg-green-100 text-gray-900`}>By hand</Link>
+        <span aria-disabled="true" className={`${button} bg-gray-200 text-gray-500`}>+ Photo (soon)</span>
+      </div>
+      <p className="mt-4 text-center text-sm">
+        <Link href="/setup" className="text-green-800 underline">Change my goal</Link>
+      </p>
     </main>
   );
 }

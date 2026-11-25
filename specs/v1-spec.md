@@ -83,6 +83,10 @@ numbers are calculated, not stored.
 - **Home screen: Mockup C**, because it shows where you are today and does not assume you are
   eating when you open it.
 - **Calories burned are entered by hand in v1** (no health-app sync).
+- **"Burned" on the Today screen** is an estimate: the user's maintenance calories (from the
+  budget formula) plus any workout calories they log. Known simplification: maintenance already
+  includes the chosen training intensity, so logged workouts add on top of it. "Left this week" is
+  the weekly budget minus calories eaten so far this week; the week runs Sunday to Saturday.
 - **Cancel** is available at every step before Confirm (S1-AC8).
 - **Unsafe goals:** the system shows a pop-up suggesting a smaller goal to start with and working
   up, and does not encourage starving (S3-AC10). Rule: more than 2 lb a week, or a daily budget
