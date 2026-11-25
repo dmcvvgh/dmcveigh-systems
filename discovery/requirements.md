@@ -53,14 +53,14 @@ journey
 | FR-2 | record the time each food entry was eaten | Must | Interview 1 |
 | FR-3 | show daily totals of calories and each macro | Must | Interview 1 |
 | FR-4 | let a user log a workout (exercise and weight lifted) | Must | Interview 2 |
-| FR-5 | show the user what their next workout is, given a changing split | Should [decide] | Interview 2 |
+| FR-5 | show the user what their next workout is, given a changing split | Should | Interview 2 |
 | FR-6 | show which muscle groups the user is lacking | Should | Interview 2 |
 | FR-7 | support a cut or bulk goal using food tracking | Should | Interview 2 |
 | FR-8 | let a user store and compare progress photos over time | Could | Interview 1 |
 | FR-9 | rank a lift against other people (bronze to diamond) | Could | Interview 2 |
 | FR-10 | let a user track body fat | Could | Interview 2 |
-| FR-11 | pull calories burned from the Apple Health app and Apple Watch | Should [decide] | Interview 3 (planned integration), practice interview |
-| FR-12 | send reminders to work out and log food | Could [decide] | Idea from Interview 3; not yet validated by users |
+| FR-11 | pull calories burned from the Apple Health app and Apple Watch | Could | Interview 3 (planned integration), practice interview |
+| FR-12 | send reminders to work out and log food | Should | Idea from Interview 3; not yet validated by users |
 
 ## Non-functional requirements
 | ID | Category | Requirement | Source |
@@ -77,6 +77,5 @@ Draft: users will keep logging only if entering food takes much less effort than
 ## MVP scope
 **In (Must):** FR-1 to FR-4, plus NFR-1, NFR-2, and NFR-5 for privacy.
 **Out:**
-- FR-5 to FR-7 (Should): useful, but not needed to test the riskiest assumption.
-- FR-11 and FR-12: integration and reminders are not needed to test the riskiest assumption, and FR-12 is not yet backed by user evidence.
-- FR-8 to FR-10 (Could): photo comparison, rankings, and body fat are nice-to-haves nobody asked for first.
+- FR-5 to FR-7 and FR-12 (Should): useful, but not needed to test the riskiest assumption. FR-12 (reminders) is not yet backed by user evidence.
+- FR-8 to FR-11 (Could): photo comparison, rankings, body fat, and Apple Health integration are nice-to-haves nobody asked for first.
