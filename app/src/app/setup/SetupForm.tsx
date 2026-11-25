@@ -179,14 +179,14 @@ function Form({ saved }: { saved: Profile | null }) {
           </label>
           <fieldset>
             <legend className="text-sm font-medium">Heavy lifting days</legend>
-            <div className="mt-1 flex flex-wrap gap-2">
+            <div className="mt-1 grid grid-cols-7 gap-1">
               {DAYS.map((name, d) => (
                 <button
                   key={name}
                   type="button"
                   aria-pressed={heavy.includes(d)}
                   onClick={() => toggleDay(d)}
-                  className={`min-h-11 min-w-11 rounded-lg border px-2 text-sm font-medium ${
+                  className={`min-h-11 rounded-lg border px-0 text-sm font-medium ${
                     heavy.includes(d) ? "border-green-700 bg-green-700 text-white" : "border-gray-300 bg-white"
                   }`}
                 >
